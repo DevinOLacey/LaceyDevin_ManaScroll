@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://fp2o2qa7rllu"]
+
+[ext_resource type="Script" uid="uid://ctq2k4ily7tn7" path="res://cards/scripts/card.gd" id="1_daomt"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cwn5f"]
+size = Vector2(192, 272)
+
+[node name="Card" type="Node2D" unique_id=676062663]
+position = Vector2(150, 890)
+script = ExtResource("1_daomt")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=835495275]
+scale = Vector2(2, 2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1134451391]
+position = Vector2(0, 8)
+shape = SubResource("RectangleShape2D_cwn5f")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=122635419]
+position = Vector2(0, 14.000008)
+scale = Vector2(0.986, 1.042)
+
+[node name="Name" type="RichTextLabel" parent="." unique_id=337741418]
+offset_left = -176.0
+offset_top = -268.0
+offset_right = 183.0
+offset_bottom = -228.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Cost" type="RichTextLabel" parent="." unique_id=704715321]
+offset_left = 148.0
+offset_top = -263.0
+offset_right = 179.0
+offset_bottom = -230.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Type" type="RichTextLabel" parent="." unique_id=1272787984]
+offset_left = -176.0
+offset_top = 53.0
+offset_right = 177.0
+offset_bottom = 85.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+vertical_alignment = 1
+
+[node name="Description" type="RichTextLabel" parent="." unique_id=1495744115]
+offset_left = -174.0
+offset_top = 96.0
+offset_right = 174.0
+offset_bottom = 271.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+vertical_alignment = 1
+
+[connection signal="mouse_entered" from="Area2D" to="." method="_on_area_2d_mouse_entered"]
+[connection signal="mouse_exited" from="Area2D" to="." method="_on_area_2d_mouse_exited"]

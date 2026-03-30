@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://crlu04u2ebpio"]
+
+[ext_resource type="Script" uid="uid://ccv4erijenged" path="res://cards/scripts/deck.gd" id="1_2sssf"]
+[ext_resource type="Texture2D" uid="uid://btlxeqitbs0kd" path="res://cards/art/Card_back.png" id="1_ti8o4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bkxmi"]
+size = Vector2(190, 275)
+
+[node name="Deck" type="Node2D" unique_id=642682178]
+script = ExtResource("1_2sssf")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=785381076]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1629250177]
+position = Vector2(0, 7.5)
+shape = SubResource("RectangleShape2D_bkxmi")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1678020389]
+position = Vector2(-0.4999962, 7.9999866)
+scale = Vector2(0.4547619, 0.46464643)
+texture = ExtResource("1_ti8o4")

@@ -1,0 +1,91 @@
+[gd_scene format=3 uid="uid://d3j6aidrrpmyf"]
+
+[ext_resource type="Script" uid="uid://ctq2k4ily7tn7" path="res://cards/scripts/card.gd" id="1_05jth"]
+[ext_resource type="Texture2D" uid="uid://bjmc4kmyhwk1t" path="res://cards/art/Mana_shield_card.png" id="2_wb0r4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cwn5f"]
+size = Vector2(192, 272)
+
+[node name="ManaShield" type="Node2D" unique_id=676062663]
+position = Vector2(150, 890)
+script = ExtResource("1_05jth")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=835495275]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1134451391]
+position = Vector2(0, 8)
+shape = SubResource("RectangleShape2D_cwn5f")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=122635419]
+position = Vector2(0, 14.000008)
+scale = Vector2(0.49289098, 0.5211506)
+texture = ExtResource("2_wb0r4")
+
+[node name="Name" type="RichTextLabel" parent="." unique_id=1738365765]
+offset_left = -90.0
+offset_top = -127.0
+offset_right = 90.0
+offset_bottom = -107.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 8
+theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/bold_italics_font_size = 8
+theme_override_font_sizes/italics_font_size = 8
+theme_override_font_sizes/mono_font_size = 8
+bbcode_enabled = true
+text = "[b]Mana Shield[/b]"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Cost" type="RichTextLabel" parent="." unique_id=147343146]
+offset_left = 71.0
+offset_top = -126.0
+offset_right = 89.0
+offset_bottom = -106.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 8
+theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/bold_italics_font_size = 8
+theme_override_font_sizes/italics_font_size = 8
+theme_override_font_sizes/mono_font_size = 8
+bbcode_enabled = true
+text = "[b]1[/b]"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Type" type="RichTextLabel" parent="." unique_id=374320706]
+offset_left = -88.0
+offset_top = 32.0
+offset_right = 87.0
+offset_bottom = 52.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 8
+theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/bold_italics_font_size = 8
+theme_override_font_sizes/italics_font_size = 8
+theme_override_font_sizes/mono_font_size = 8
+bbcode_enabled = true
+text = "[b]Attack[/b]"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Description" type="RichTextLabel" parent="." unique_id=1731980447]
+offset_left = -86.0
+offset_top = 54.0
+offset_right = 88.0
+offset_bottom = 143.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 8
+theme_override_font_sizes/bold_font_size = 8
+theme_override_font_sizes/bold_italics_font_size = 8
+theme_override_font_sizes/italics_font_size = 8
+theme_override_font_sizes/mono_font_size = 8
+bbcode_enabled = true
+text = "Emit a shield of pure mana [i]blocking [b]2[/b][/i] damage"
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[connection signal="mouse_entered" from="Area2D" to="." method="_on_area_2d_mouse_entered"]
+[connection signal="mouse_exited" from="Area2D" to="." method="_on_area_2d_mouse_exited"]

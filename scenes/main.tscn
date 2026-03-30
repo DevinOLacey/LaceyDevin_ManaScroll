@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://ddd3hdgfh1qfc"]
+
+[ext_resource type="PackedScene" uid="uid://c2s7aywrd3dth" path="res://cards/setup_scenes/card_manager.tscn" id="1_0wfyh"]
+[ext_resource type="PackedScene" uid="uid://my3huekfu038" path="res://cards/setup_scenes/player_hand.tscn" id="3_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://xrfhh4p6pmp5" path="res://cards/setup_scenes/card_slot.tscn" id="3_sugp2"]
+[ext_resource type="PackedScene" uid="uid://dbk7agsrxcp17" path="res://cards/setup_scenes/input_manager.tscn" id="4_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://cards/setup_scenes/deck.tscn" id="5_tbgi4"]
+
+[node name="main" type="Node2D" unique_id=2029937529]
+
+[node name="CardManager" parent="." unique_id=620233460 instance=ExtResource("1_0wfyh")]
+position = Vector2(-2, -2)
+
+[node name="CardSlot" parent="." unique_id=1408767343 instance=ExtResource("3_sugp2")]
+position = Vector2(363, 268)
+
+[node name="PlayerHand" parent="." unique_id=1877208770 instance=ExtResource("3_jyhfs")]
+
+[node name="InputManager" parent="." unique_id=529797179 instance=ExtResource("4_jyhfs")]
+
+[node name="Deck" parent="." unique_id=642682178 instance=ExtResource("5_tbgi4")]
+position = Vector2(150, 890)
+
+[node name="CardSlot2" parent="." unique_id=228751927 instance=ExtResource("3_sugp2")]
+position = Vector2(607, 265)
