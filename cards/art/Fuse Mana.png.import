@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://btlxeqitbs0kd"
-path="res://.godot/imported/Card_back.png-8a6200fcd931d10c031be1ee93f28179.ctex"
+uid="uid://blabdnrbd4tub"
+path="res://.godot/imported/Fuse Mana.png-4d65a2500d3bb1aa524b14c7caeb8bcb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://cards/art/Card_back.png"
-dest_files=["res://.godot/imported/Card_back.png-8a6200fcd931d10c031be1ee93f28179.ctex"]
+source_file="res://cards/art/Fuse Mana.png"
+dest_files=["res://.godot/imported/Fuse Mana.png-4d65a2500d3bb1aa524b14c7caeb8bcb.ctex"]
 
 [params]
 

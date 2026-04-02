@@ -5,6 +5,7 @@ signal left_mouse_button_released
 
 const COLLISON_MASK_CARD = 1
 const COLLISON_MASK_CARD_DECK = 4
+const DECK_VIEW_CARD_META = "deck_view_card"
 
 var card_manager_ref
 var deck_ref
@@ -33,7 +34,7 @@ func raycast_at_cursor():
 		var result_collision_mask = result[0].collider.collision_mask
 		if result_collision_mask == COLLISON_MASK_CARD:
 			var card_found = result[0].collider.get_parent()
-			if card_found:
+			if card_found and not (card_found.has_meta(DECK_VIEW_CARD_META) and card_found.get_meta(DECK_VIEW_CARD_META)):
 				card_manager_ref.start_drag(card_found)
 		elif result_collision_mask == COLLISON_MASK_CARD_DECK:
-			deck_ref.draw_card()
+			deck_ref.toggle_deck_view()

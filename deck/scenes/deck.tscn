@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://crlu04u2ebpio"]
 
-[ext_resource type="Script" uid="uid://ccv4erijenged" path="res://cards/scripts/deck.gd" id="1_2sssf"]
-[ext_resource type="Texture2D" uid="uid://btlxeqitbs0kd" path="res://cards/art/Card_back.png" id="1_ti8o4"]
+[ext_resource type="Script" uid="uid://ccv4erijenged" path="res://deck/scripts/deck_controller.gd" id="1_2sssf"]
+[ext_resource type="Texture2D" uid="uid://dtccf6yhttcxx" path="res://cards/art/CardBack.png" id="2_qbaio"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bkxmi"]
 size = Vector2(190, 275)
@@ -18,6 +18,6 @@ position = Vector2(0, 7.5)
 shape = SubResource("RectangleShape2D_bkxmi")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1678020389]
-position = Vector2(-0.4999962, 7.9999866)
-scale = Vector2(0.4547619, 0.46464643)
-texture = ExtResource("1_ti8o4")
+position = Vector2(-1.7285352e-06, 7.500006)
+scale = Vector2(0.18554688, 0.17903647)
+texture = ExtResource("2_qbaio")

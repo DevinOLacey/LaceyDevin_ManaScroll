@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://nplhga53vmun"]
+
+[ext_resource type="Script" uid="uid://ctq2k4ily7tn7" path="res://cards/scripts/card.gd" id="1_8blj0"]
+[ext_resource type="Texture2D" uid="uid://c3asww13nnwvt" path="res://cards/art/BlankCard.png" id="2_ky1y0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ky1y0"]
+size = Vector2(194.28572, 281.14288)
+
+[node name="card_x4_scale" type="Node2D" unique_id=136112802]
+script = ExtResource("1_8blj0")
+registers_hover_signals = false
+description_size_preset = 2
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1563063329]
+scale = Vector2(1.4, 1.4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=622349306]
+position = Vector2(7.663454e-06, 3.4285648)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_ky1y0")
+
+[node name="Frame" type="Sprite2D" parent="." unique_id=309443549]
+z_index = 1
+position = Vector2(-5.00679e-06, 11.036999)
+scale = Vector2(0.7450981, 0.73868304)
+texture = ExtResource("2_ky1y0")
+
+[node name="Art" type="Sprite2D" parent="." unique_id=1591885406]
+position = Vector2(0, -39.000008)
+scale = Vector2(0.18945313, 0.1640625)
+
+[node name="Name" type="RichTextLabel" parent="." unique_id=385436009]
+offset_left = -67.0
+offset_top = -173.0
+offset_right = 115.0
+offset_bottom = -144.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Cost" type="RichTextLabel" parent="." unique_id=228425633]
+offset_left = -120.0
+offset_top = -180.0
+offset_right = -83.0
+offset_bottom = -143.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Type" type="RichTextLabel" parent="." unique_id=1600663692]
+offset_left = -98.0
+offset_top = 45.0
+offset_right = 99.0
+offset_bottom = 70.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="RichTextLabel" parent="." unique_id=310094036]
+offset_left = -118.0
+offset_top = 85.0
+offset_right = 117.0
+offset_bottom = 164.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DrawChance" type="RichTextLabel" parent="." unique_id=165425980]
+z_index = 5
+offset_left = -125.0
+offset_top = -151.0
+offset_right = 128.0
+offset_bottom = -118.0
+theme_override_colors/default_color = Color(1, 0.9098039, 0, 1)
+bbcode_enabled = true
+horizontal_alignment = 1
+vertical_alignment = 1

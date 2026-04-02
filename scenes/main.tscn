@@ -1,10 +1,12 @@
 [gd_scene format=3 uid="uid://ddd3hdgfh1qfc"]
 
-[ext_resource type="PackedScene" uid="uid://c2s7aywrd3dth" path="res://cards/setup_scenes/card_manager.tscn" id="1_0wfyh"]
-[ext_resource type="PackedScene" uid="uid://my3huekfu038" path="res://cards/setup_scenes/player_hand.tscn" id="3_jyhfs"]
-[ext_resource type="PackedScene" uid="uid://xrfhh4p6pmp5" path="res://cards/setup_scenes/card_slot.tscn" id="3_sugp2"]
-[ext_resource type="PackedScene" uid="uid://dbk7agsrxcp17" path="res://cards/setup_scenes/input_manager.tscn" id="4_jyhfs"]
-[ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://cards/setup_scenes/deck.tscn" id="5_tbgi4"]
+[ext_resource type="PackedScene" uid="uid://c2s7aywrd3dth" path="res://cards/scenes/card_manager.tscn" id="1_0wfyh"]
+[ext_resource type="PackedScene" uid="uid://my3huekfu038" path="res://cards/scenes/player_hand.tscn" id="3_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://xrfhh4p6pmp5" path="res://cards/scenes/card_slot.tscn" id="3_sugp2"]
+[ext_resource type="PackedScene" uid="uid://dbk7agsrxcp17" path="res://battle/scenes/input_manager.tscn" id="4_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://deck/scenes/deck.tscn" id="5_tbgi4"]
+[ext_resource type="Texture2D" uid="uid://bv5sodykfjwqi" path="res://cards/art/end_turn.png" id="6_tefeu"]
+[ext_resource type="PackedScene" uid="uid://c5c2toepivbq1" path="res://battle/scenes/battle_controller.tscn" id="7_o6xl0"]
 
 [node name="main" type="Node2D" unique_id=2029937529]
 
@@ -23,3 +25,20 @@ position = Vector2(150, 890)
 
 [node name="CardSlot2" parent="." unique_id=228751927 instance=ExtResource("3_sugp2")]
 position = Vector2(607, 265)
+
+[node name="EndTurnButton" type="TextureButton" parent="." unique_id=1560200506]
+offset_left = 1676.0001
+offset_top = 853.00006
+offset_right = 2296.0
+offset_bottom = 1269.0
+scale = Vector2(0.40396252, 0.477939)
+texture_normal = ExtResource("6_tefeu")
+texture_pressed = ExtResource("6_tefeu")
+texture_hover = ExtResource("6_tefeu")
+
+[node name="BattleManager" parent="." unique_id=1816411013 instance=ExtResource("7_o6xl0")]
+
+[node name="BattleTimer" type="Timer" parent="." unique_id=1351592360]
+one_shot = true
+
+[connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]

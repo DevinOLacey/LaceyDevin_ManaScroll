@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1mvf31p1dss4"
-path="res://.godot/imported/Mana_bolt_card.png-4edb452db9fcb6713cc059c893d9b54f.ctex"
+uid="uid://8w5r0wiruphw"
+path="res://.godot/imported/Mana Shield.png-34f226af04993b7603272db046688bd8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://cards/art/Mana_bolt_card.png"
-dest_files=["res://.godot/imported/Mana_bolt_card.png-4edb452db9fcb6713cc059c893d9b54f.ctex"]
+source_file="res://cards/art/Mana Shield.png"
+dest_files=["res://.godot/imported/Mana Shield.png-34f226af04993b7603272db046688bd8.ctex"]
 
 [params]
 

@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://t00hwt4t8vb8"]
+
+[ext_resource type="Script" uid="uid://j018pnuykuqe" path="res://deck/scripts/deck_view.gd" id="2_0x41m"]
+[ext_resource type="PackedScene" uid="uid://dgfajtscd6f57" path="res://cards/scenes/card.tscn" id="2_yxscy"]
+
+[node name="DeckView" type="Node2D" unique_id=1071250357]
+script = ExtResource("2_0x41m")
+
+[node name="Card17" parent="." unique_id=676062663 instance=ExtResource("2_yxscy")]
+position = Vector2(145, 250)
+
+[node name="Card18" parent="." unique_id=1057969911 instance=ExtResource("2_yxscy")]
+position = Vector2(365, 250)
+
+[node name="Card19" parent="." unique_id=267366097 instance=ExtResource("2_yxscy")]
+position = Vector2(585, 250)
+
+[node name="Card20" parent="." unique_id=872817339 instance=ExtResource("2_yxscy")]
+position = Vector2(805, 250)
+
+[node name="Card21" parent="." unique_id=271290352 instance=ExtResource("2_yxscy")]
+position = Vector2(1025, 250)
+
+[node name="Card22" parent="." unique_id=262251793 instance=ExtResource("2_yxscy")]
+position = Vector2(1245, 250)
+
+[node name="Card23" parent="." unique_id=1805083944 instance=ExtResource("2_yxscy")]
+position = Vector2(1465, 250)
+
+[node name="Card24" parent="." unique_id=539898006 instance=ExtResource("2_yxscy")]
+position = Vector2(1685, 250)
+
+[node name="Card25" parent="." unique_id=396403020 instance=ExtResource("2_yxscy")]
+position = Vector2(145, 570)
+
+[node name="Card26" parent="." unique_id=669057527 instance=ExtResource("2_yxscy")]
+position = Vector2(365, 570)
+
+[node name="Card27" parent="." unique_id=639758437 instance=ExtResource("2_yxscy")]
+position = Vector2(585, 570)
+
+[node name="Card28" parent="." unique_id=1967079787 instance=ExtResource("2_yxscy")]
+position = Vector2(805, 570)
+
+[node name="Card29" parent="." unique_id=1053471246 instance=ExtResource("2_yxscy")]
+position = Vector2(1025, 570)
+
+[node name="Card30" parent="." unique_id=774469996 instance=ExtResource("2_yxscy")]
+position = Vector2(1245, 570)
+
+[node name="Card31" parent="." unique_id=2033636582 instance=ExtResource("2_yxscy")]
+position = Vector2(1465, 570)
+
+[node name="Card32" parent="." unique_id=447121733 instance=ExtResource("2_yxscy")]
+position = Vector2(1685, 570)

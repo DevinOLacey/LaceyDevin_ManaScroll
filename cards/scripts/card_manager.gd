@@ -3,8 +3,10 @@ extends Node2D
 const COLLISON_MASK = 1
 const COLLISON_MASK_CARD_SLOT = 2
 const DEFAULT_DRAW_SPEED = 0.1
+const RETURN_TO_HAND_SPEED = 0.1
 const CARD_BOTTOM_OFFSET = 144.0
-const HOVER_PREVIEW_SCENE = preload("res://cards/setup_scenes/card_2_scale.tscn")
+const HOVER_PREVIEW_SCENE = preload("res://cards/scenes/card_2_scale.tscn")
+const DECK_VIEW_CARD_META = "deck_view_card"
 
 var card_drag
 var screen_size
@@ -21,7 +23,8 @@ func _ready() -> void:
 	$"../InputManager".connect("left_mouse_button_released", on_left_click_release)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
+	var deck_ref = $"../Deck"
 	if card_drag:
 		var mouse_pos = get_global_mouse_position()
 		card_drag.position = Vector2(clamp(mouse_pos.x, 0, screen_size.x), clamp(mouse_pos.y, 0, screen_size.y))
@@ -46,6 +49,10 @@ func _process(delta: float) -> void:
 func start_drag(card):
 	card_drag = card
 	set_hovered_card(null)
+	card_drag.set_visuals_visible(true)
+	hide_hover_preview()
+	_set_card_collision_disabled(card_drag, true)
+	card_drag.z_index = 3
 
 
 func finish_drag():
@@ -53,10 +60,16 @@ func finish_drag():
 	if card_slot_found and not card_slot_found.card_in_slot:
 		player_hand_ref.remove_card_from_hand(card_drag)
 		card_drag.position = card_slot_found.position
-		card_drag.get_node("Area2D/CollisionShape2D").disabled = true
+		_set_card_collision_disabled(card_drag, true)
+		card_drag.z_index = 1
 		card_slot_found.card_in_slot = true
 	else:
-		player_hand_ref.add_card_to_hand(card_drag, DEFAULT_DRAW_SPEED)
+		set_hovered_card(null)
+		card_drag.set_visuals_visible(true)
+		hide_hover_preview()
+		_set_card_collision_disabled(card_drag, false)
+		card_drag.z_index = 1
+		player_hand_ref.add_card_to_hand(card_drag, RETURN_TO_HAND_SPEED)
 	card_drag = null
 
 
@@ -71,6 +84,8 @@ func on_left_click_release():
 
 
 func on_hover_card(card):
+	if card_drag:
+		return
 	set_hovered_card(card)
 	
 
@@ -85,7 +100,7 @@ func on_hover_off_card(card):
 
 func highlight_card(card, hovered):
 	var base_position = card.position
-	if card.hand_position != null:
+	if card.hand_position != null and card.position.distance_to(card.hand_position) <= 1.0:
 		base_position = card.hand_position
 	if hovered:
 		card.set_visuals_visible(false)
@@ -115,10 +130,10 @@ func show_hover_preview(card, base_position: Vector2):
 	hide_hover_preview()
 	hover_preview = HOVER_PREVIEW_SCENE.instantiate()
 	hover_preview.registers_hover_signals = false
-	add_child(hover_preview)
+	card.get_parent().add_child(hover_preview)
 	hover_preview.copy_display_from(card)
 	hover_preview.position = base_position - Vector2(0, CARD_BOTTOM_OFFSET)
-	hover_preview.z_index = 10
+	hover_preview.z_index = card.z_index + 10
 
 	var preview_area = hover_preview.get_node_or_null("Area2D")
 	if preview_area:
@@ -134,6 +149,15 @@ func hide_hover_preview():
 	if hover_preview:
 		hover_preview.queue_free()
 		hover_preview = null
+
+
+func _set_card_collision_disabled(card: Node2D, disabled: bool) -> void:
+	if card == null:
+		return
+
+	var collision: CollisionShape2D = card.get_node_or_null("Area2D/CollisionShape2D")
+	if collision:
+		collision.disabled = disabled
 
 
 func raycast_check_for_card_slot():
@@ -156,7 +180,18 @@ func raycast_check_for_card():
 	parameters.collision_mask = COLLISON_MASK
 	var result = space_state.intersect_point(parameters)
 	if result.size() > 0:
-		return get_highest_z_card(result)
+		var deck_ref = $"../Deck"
+		var deck_view_open: bool = deck_ref and deck_ref.has_method("is_deck_view_open") and deck_ref.is_deck_view_open()
+		var filtered_cards: Array = []
+		for hit in result:
+			var card = hit.collider.get_parent()
+			var is_deck_view_card: bool = card.has_meta(DECK_VIEW_CARD_META) and card.get_meta(DECK_VIEW_CARD_META)
+			if deck_view_open and is_deck_view_card:
+				filtered_cards.append(hit)
+			elif not deck_view_open and not is_deck_view_card:
+				filtered_cards.append(hit)
+		if filtered_cards.size() > 0:
+			return get_highest_z_card(filtered_cards)
 	return null
 
 
