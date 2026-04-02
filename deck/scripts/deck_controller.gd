@@ -2,13 +2,14 @@ extends Node2D
 
 const DRAW_SPEED = 0.2
 const CARD_SCENE = preload("res://cards/scenes/card.tscn")
-const CardDatabase = preload("res://cards/data/card_database.gd")
+const DeckCardDatabase = preload("res://cards/data/card_database.gd")
 const DECK_VIEW_SCENE = preload("res://deck/scenes/deck_view.tscn")
 const DECK_VIEW_BACKDROP_COLOR = Color(0.02, 0.03, 0.06, 0.72)
 const DECK_VIEW_CANVAS_LAYER = 10
+const DEFAULT_HAND_SIZE = 7
 
-var card_definitions := CardDatabase.get_card_definitions()
-var card_draw_weights := CardDatabase.get_card_draw_weights()
+var card_definitions := DeckCardDatabase.get_card_definitions()
+var card_draw_weights := DeckCardDatabase.get_card_draw_weights()
 
 var player_hand_ref
 var deck_view_ref: Node2D
@@ -18,20 +19,24 @@ var deck_view_layer_ref: CanvasLayer
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	randomize()
-	player_hand_ref = $"../PlayerHand"
+	player_hand_ref = get_node_or_null("../PlayerHand")
 	_create_deck_view()
 	call_deferred("draw_starting_hand")
 
 
 func draw_card():
-	if player_hand_ref and player_hand_ref.is_hand_full():
+	var player_hand := _get_player_hand_ref()
+	if player_hand and player_hand.has_method("is_hand_full") and player_hand.is_hand_full():
 		return
 
 	var new_card: Node2D = _draw_card_instance()
 	if new_card == null:
 		return
 
-	player_hand_ref.add_card_to_hand(new_card, DRAW_SPEED)
+	if player_hand and player_hand.has_method("add_card_to_hand"):
+		player_hand.add_card_to_hand(new_card, DRAW_SPEED)
+	else:
+		push_error("PlayerHand is missing add_card_to_hand(). Check the PlayerHand scene script path.")
 
 
 func toggle_deck_view() -> void:
@@ -51,11 +56,16 @@ func is_deck_view_open() -> bool:
 
 
 func draw_starting_hand() -> void:
-	if player_hand_ref == null:
+	var player_hand := _get_player_hand_ref()
+	if player_hand == null:
 		return
 
 	var starting_cards: Array[Node2D] = []
-	var cards_to_draw: int = player_hand_ref.get_max_hand_size()
+	var cards_to_draw: int = DEFAULT_HAND_SIZE
+	if player_hand.has_method("get_max_hand_size"):
+		cards_to_draw = player_hand.get_max_hand_size()
+	else:
+		push_error("PlayerHand is missing get_max_hand_size(). Using default hand size.")
 
 	for i in range(cards_to_draw):
 		var new_card: Node2D = _draw_card_instance()
@@ -65,7 +75,10 @@ func draw_starting_hand() -> void:
 	if starting_cards.is_empty():
 		return
 
-	player_hand_ref.populate_starting_hand(starting_cards)
+	if player_hand.has_method("populate_starting_hand"):
+		player_hand.populate_starting_hand(starting_cards)
+	else:
+		push_error("PlayerHand is missing populate_starting_hand(). Check the PlayerHand scene script path.")
 
 
 func _draw_card_instance() -> Node2D:
@@ -140,3 +153,9 @@ func _roll_weighted_card() -> String:
 
 	var fallback_card_ids = card_draw_weights.keys()
 	return str(fallback_card_ids[0])
+
+
+func _get_player_hand_ref() -> Node:
+	if player_hand_ref == null or not is_instance_valid(player_hand_ref):
+		player_hand_ref = get_node_or_null("../PlayerHand")
+	return player_hand_ref
