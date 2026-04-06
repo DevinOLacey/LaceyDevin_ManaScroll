@@ -31,8 +31,37 @@ func add_card_to_hand(card, speed):
 		animate_card_to_position(card, card.hand_position, speed, true)
 
 
+func add_cards_to_hand(cards: Array[Node2D], speed: float, manifest_new_cards: bool = true) -> void:
+	var added_cards: Array[Node2D] = []
+	for card in cards:
+		if card in player_hand:
+			continue
+		player_hand.insert(0, card)
+		added_cards.append(card)
+
+	if added_cards.is_empty():
+		return
+
+	for i in range(player_hand.size()):
+		var hand_card = player_hand[i]
+		var new_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
+		hand_card.hand_position = new_position
+		if hand_card in added_cards and manifest_new_cards and hand_card.has_method("manifest_to_position"):
+			hand_card.manifest_to_position(new_position, MANIFEST_DRAW_SPEED)
+		else:
+			animate_card_to_position(hand_card, new_position, speed)
+
+
 func get_max_hand_size() -> int:
 	return MAX_HAND_SIZE
+
+
+func get_hand_size() -> int:
+	return player_hand.size()
+
+
+func get_cards() -> Array:
+	return player_hand.duplicate()
 
 
 func is_hand_full() -> bool:
@@ -70,8 +99,20 @@ func update_hand_targets() -> void:
 		card.hand_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
 
 
+func layout_cards_at_row(cards: Array, row_y: float, speed: float = DEFAULT_DRAW_SPEED) -> void:
+	for i in range(cards.size()):
+		var card: Node2D = cards[i]
+		var new_position = Vector2(calculate_card_position_for_count(i, cards.size()), row_y)
+		card.hand_position = new_position
+		animate_card_to_position(card, new_position, speed)
+
+
 func calculate_card_position(index):
-	var total_width = (player_hand.size() - 1) * CARD_WIDTH
+	return calculate_card_position_for_count(index, player_hand.size())
+
+
+func calculate_card_position_for_count(index: int, total_cards: int) -> float:
+	var total_width = (total_cards - 1) * CARD_WIDTH
 	var x_offset = center_screen_x + index * CARD_WIDTH - total_width / 2.0
 	return x_offset
 
@@ -94,6 +135,19 @@ func remove_card_from_hand(card):
 	if card in player_hand:
 		player_hand.erase(card)
 		update_hand_position(DEFAULT_DRAW_SPEED)
+
+
+func has_card(card: Node2D) -> bool:
+	return card in player_hand
+
+
+func find_matching_card_by_id(card_id: String, excluded_card: Node2D = null) -> Node2D:
+	for card in player_hand:
+		if card == excluded_card:
+			continue
+		if str(card.get_meta("card_id", "")) == card_id:
+			return card
+	return null
 
 
 func _manifest_starting_hand(cards: Array[Node2D]) -> void:

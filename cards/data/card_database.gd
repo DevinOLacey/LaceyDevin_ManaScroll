@@ -6,6 +6,8 @@ const CARD_DEFINITIONS := {
 		"name": "Mana Bolt",
 		"art": "res://cards/art/Mana Bolt.png",
 		"cost": 0,
+		"category": "spell",
+		"target_group": "enemy",
 		"type": "[b]Spell[/b]",
 		"damage": 3,
 		"effect": null,
@@ -15,6 +17,8 @@ const CARD_DEFINITIONS := {
 		"name": "Mana Shield",
 		"art": "res://cards/art/Mana Shield.png",
 		"cost": 0,
+		"category": "spell",
+		"target_group": "ally",
 		"type": "[b]Spell[/b]",
 		"block": 2,
 		"effect": null,
@@ -24,9 +28,11 @@ const CARD_DEFINITIONS := {
 		"name": "Fuse Mana",
 		"art": "res://cards/art/Fuse Mana.png",
 		"cost": 1,
+		"category": "enchantment",
+		"target_group": "self",
 		"type": "[b]Enchant[/b]",
 		"effect": "combine",
-		"description": "Fuse 2 spells together",
+		"description": "Fuse the mana of 2 of the same spell together",
 	}
 }
 

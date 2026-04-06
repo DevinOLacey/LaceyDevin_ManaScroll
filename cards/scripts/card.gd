@@ -23,6 +23,7 @@ const DRAW_CHANCE_FONT_SIZE_REGULAR = 4
 const DRAW_CHANCE_FONT_SIZE_SCALE_4 = 16
 #const DRAW_CHANCE_FONT_SIZE_SCALE_2 = DRAW_CHANCE_FONT_SIZE_REGULAR
 const LABEL_Z_INDEX = 5
+const MIN_AUTO_FIT_FONT_SIZE = 4
 
 
 const MANIFEST_START_OFFSET = Vector2(0, 48)
@@ -42,6 +43,7 @@ func _ready() -> void:
 	_apply_label_z_index()
 	if registers_hover_signals and get_parent().has_method("connect_card_signals"):
 		get_parent().connect_card_signals(self)
+	call_deferred("_auto_fit_all_labels")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -84,6 +86,7 @@ func apply_card_data(card_id: String, card_data: Dictionary) -> void:
 	_set_label_text("Description", description_text)
 	_set_label_text("DrawChance", "")
 	_set_art_texture(_resolve_texture(art_source))
+	call_deferred("_auto_fit_all_labels")
 
 
 func set_visuals_visible(visible_state: bool) -> void:
@@ -211,6 +214,7 @@ func _set_label_bbcode(label: RichTextLabel, text_value: String) -> void:
 	label.clear()
 	if not text_value.is_empty():
 		label.append_text(text_value)
+	_fit_label_to_height(label)
 
 
 func _get_label_source_text(label: RichTextLabel) -> String:
@@ -219,6 +223,72 @@ func _get_label_source_text(label: RichTextLabel) -> String:
 	if label.has_meta("bbcode_source"):
 		return str(label.get_meta("bbcode_source"))
 	return label.text
+
+
+func _auto_fit_all_labels() -> void:
+	var name_label: RichTextLabel = get_node_or_null("Name")
+	if name_label:
+		_fit_label_to_height(name_label)
+
+	var draw_chance_label: RichTextLabel = get_node_or_null("DrawChance")
+	if draw_chance_label:
+		_fit_label_to_height(draw_chance_label)
+
+	_fit_label_group_to_height([
+		get_node_or_null("Cost"),
+		get_node_or_null("Type"),
+		get_node_or_null("Description"),
+	])
+
+
+func _fit_label_to_height(label: RichTextLabel) -> void:
+	if label == null:
+		return
+
+	var starting_font_size_value = label.get("theme_override_font_sizes/normal_font_size")
+	if starting_font_size_value == null:
+		return
+
+	var starting_font_size: int = starting_font_size_value
+	if starting_font_size <= 0:
+		return
+
+	for font_size in range(starting_font_size, MIN_AUTO_FIT_FONT_SIZE - 1, -1):
+		_apply_label_font_size(label, font_size)
+		label.queue_redraw()
+		if label.get_content_height() <= label.size.y:
+			return
+
+
+func _fit_label_group_to_height(labels: Array) -> void:
+	var valid_labels: Array[RichTextLabel] = []
+	var starting_font_size := 0
+	for label_variant in labels:
+		var label := label_variant as RichTextLabel
+		if label == null:
+			continue
+		var font_size_value = label.get("theme_override_font_sizes/normal_font_size")
+		if font_size_value == null:
+			continue
+		valid_labels.append(label)
+		starting_font_size = max(starting_font_size, int(font_size_value))
+
+	if valid_labels.is_empty() or starting_font_size <= 0:
+		return
+
+	for font_size in range(starting_font_size, MIN_AUTO_FIT_FONT_SIZE - 1, -1):
+		for label in valid_labels:
+			_apply_label_font_size(label, font_size)
+			label.queue_redraw()
+
+		var all_fit := true
+		for label in valid_labels:
+			if label.get_content_height() > label.size.y:
+				all_fit = false
+				break
+
+		if all_fit:
+			return
 
 
 func _set_art_texture(texture: Texture2D) -> void:

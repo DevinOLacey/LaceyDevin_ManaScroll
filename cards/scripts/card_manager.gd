@@ -1,7 +1,7 @@
 extends Node2D
 
 const COLLISON_MASK = 1
-const COLLISON_MASK_CARD_SLOT = 2
+const COLLISON_MASK_TARGET = 8
 const DEFAULT_DRAW_SPEED = 0.1
 const RETURN_TO_HAND_SPEED = 0.1
 const CARD_BOTTOM_OFFSET = 144.0
@@ -14,17 +14,27 @@ var card_is_hovered
 var player_hand_ref
 var hover_preview
 var hovered_card
+var battle_manager_ref
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	screen_size = get_viewport_rect().size
-	player_hand_ref = $"../PlayerHand"
+	player_hand_ref = $"../PlayerSide/PlayerDecks/PlayerHand"
+	battle_manager_ref = $"../BattleManager"
 	$"../InputManager".connect("left_mouse_button_released", on_left_click_release)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	var deck_ref = $"../Deck"
+	var deck_ref = $"../PlayerSide/PlayerDecks/Deck"
+	if hovered_card and not is_instance_valid(hovered_card):
+		hovered_card = null
+		card_is_hovered = false
+		hide_hover_preview()
+	if battle_manager_ref and battle_manager_ref.has_method("is_selection_active") and battle_manager_ref.is_selection_active():
+		if hovered_card:
+			set_hovered_card(null)
+		return
 	if card_drag:
 		var mouse_pos = get_global_mouse_position()
 		card_drag.position = Vector2(clamp(mouse_pos.x, 0, screen_size.x), clamp(mouse_pos.y, 0, screen_size.y))
@@ -47,6 +57,11 @@ func _process(_delta: float) -> void:
 
 
 func start_drag(card):
+	if player_hand_ref and player_hand_ref.has_method("has_card") and not player_hand_ref.has_card(card):
+		return
+	if battle_manager_ref and battle_manager_ref.has_method("can_player_interact") and not battle_manager_ref.can_player_interact():
+		return
+
 	card_drag = card
 	set_hovered_card(null)
 	card_drag.set_visuals_visible(true)
@@ -56,21 +71,33 @@ func start_drag(card):
 
 
 func finish_drag():
-	var card_slot_found = raycast_check_for_card_slot()
-	if card_slot_found and not card_slot_found.card_in_slot:
-		player_hand_ref.remove_card_from_hand(card_drag)
-		card_drag.position = card_slot_found.position
-		_set_card_collision_disabled(card_drag, true)
-		card_drag.z_index = 1
-		card_slot_found.card_in_slot = true
-	else:
-		set_hovered_card(null)
-		card_drag.set_visuals_visible(true)
-		hide_hover_preview()
-		_set_card_collision_disabled(card_drag, false)
-		card_drag.z_index = 1
-		player_hand_ref.add_card_to_hand(card_drag, RETURN_TO_HAND_SPEED)
+	var target_found = raycast_check_for_target()
+	if target_found and battle_manager_ref and battle_manager_ref.has_method("try_play_card"):
+		if battle_manager_ref.try_play_card(card_drag, target_found):
+			card_drag = null
+			return
+
+	set_hovered_card(null)
+	card_drag.set_visuals_visible(true)
+	hide_hover_preview()
+	_set_card_collision_disabled(card_drag, false)
+	card_drag.z_index = 1
+	player_hand_ref.add_card_to_hand(card_drag, RETURN_TO_HAND_SPEED)
 	card_drag = null
+
+
+func discard_card(card):
+	if card == null:
+		return
+	if hovered_card == card:
+		set_hovered_card(null)
+	if card_drag == card:
+		hide_hover_preview()
+		card_drag = null
+	if player_hand_ref and player_hand_ref.has_method("has_card") and not player_hand_ref.has_card(card):
+		return
+	if battle_manager_ref and battle_manager_ref.has_method("discard_player_card_from_hand"):
+		battle_manager_ref.discard_player_card_from_hand(card)
 
 
 func connect_card_signals(card):
@@ -85,6 +112,8 @@ func on_left_click_release():
 
 func on_hover_card(card):
 	if card_drag:
+		return
+	if battle_manager_ref and battle_manager_ref.has_method("is_selection_active") and battle_manager_ref.is_selection_active():
 		return
 	set_hovered_card(card)
 	
@@ -160,12 +189,12 @@ func _set_card_collision_disabled(card: Node2D, disabled: bool) -> void:
 		collision.disabled = disabled
 
 
-func raycast_check_for_card_slot():
+func raycast_check_for_target():
 	var space_state = get_world_2d().direct_space_state
 	var parameters = PhysicsPointQueryParameters2D.new()
 	parameters.position = get_global_mouse_position()
 	parameters.collide_with_areas = true
-	parameters.collision_mask = COLLISON_MASK_CARD_SLOT
+	parameters.collision_mask = COLLISON_MASK_TARGET
 	var result = space_state.intersect_point(parameters)
 	if result.size() > 0:
 		return result[0].collider.get_parent()
@@ -180,7 +209,7 @@ func raycast_check_for_card():
 	parameters.collision_mask = COLLISON_MASK
 	var result = space_state.intersect_point(parameters)
 	if result.size() > 0:
-		var deck_ref = $"../Deck"
+		var deck_ref = $"../PlayerSide/PlayerDecks/Deck"
 		var deck_view_open: bool = deck_ref and deck_ref.has_method("is_deck_view_open") and deck_ref.is_deck_view_open()
 		var filtered_cards: Array = []
 		for hit in result:

@@ -39,6 +39,38 @@ func draw_card():
 		push_error("PlayerHand is missing add_card_to_hand(). Check the PlayerHand scene script path.")
 
 
+func draw_up_to_max_hand_size() -> void:
+	var player_hand := _get_player_hand_ref()
+	if player_hand == null:
+		return
+
+	var current_hand_size := 0
+	if player_hand.has_method("get_hand_size"):
+		current_hand_size = player_hand.get_hand_size()
+
+	var max_hand_size := DEFAULT_HAND_SIZE
+	if player_hand.has_method("get_max_hand_size"):
+		max_hand_size = player_hand.get_max_hand_size()
+
+	var cards_needed := maxi(0, max_hand_size - current_hand_size)
+	var drawn_cards: Array[Node2D] = []
+	for i in range(cards_needed):
+		var new_card: Node2D = _draw_card_instance()
+		if new_card == null:
+			break
+		drawn_cards.append(new_card)
+
+	if drawn_cards.is_empty():
+		return
+
+	if player_hand.has_method("add_cards_to_hand"):
+		player_hand.add_cards_to_hand(drawn_cards, DRAW_SPEED)
+	else:
+		for card in drawn_cards:
+			if player_hand.has_method("add_card_to_hand"):
+				player_hand.add_card_to_hand(card, DRAW_SPEED)
+
+
 func toggle_deck_view() -> void:
 	if deck_view_ref == null:
 		return
@@ -92,7 +124,7 @@ func _draw_card_instance() -> Node2D:
 		return null
 
 	var new_card: Node2D = CARD_SCENE.instantiate()
-	$"../CardManager".add_child(new_card)
+	$"../../../CardManager".add_child(new_card)
 	new_card.name = card_drawn
 	if new_card.has_method("apply_card_data"):
 		new_card.apply_card_data(card_drawn, card_definition)

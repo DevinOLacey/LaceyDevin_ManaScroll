@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://dfv7enj3evtbh"]
+
+[ext_resource type="Script" uid="uid://bswnrc7fd7wtv" path="res://cards/scripts/select_from_hand.gd" id="1_71aj1"]
+[ext_resource type="PackedScene" uid="uid://dgfajtscd6f57" path="res://cards/scenes/card.tscn" id="1_l5axl"]
+[ext_resource type="Texture2D" uid="uid://ckwjt7nvu6al5" path="res://cards/art/confirm.png" id="2_7t2lt"]
+[ext_resource type="Texture2D" uid="uid://qhib4iw264nx" path="res://cards/art/unready_confrim.png" id="3_sjmqg"]
+
+[node name="SelectFromHand" type="Node2D" unique_id=1830854680]
+script = ExtResource("1_71aj1")
+
+[node name="Card" parent="." unique_id=676062663 instance=ExtResource("1_l5axl")]
+position = Vector2(520, 400)
+
+[node name="Card2" parent="." unique_id=1083573278 instance=ExtResource("1_l5axl")]
+position = Vector2(740, 400)
+
+[node name="Card3" parent="." unique_id=1967036337 instance=ExtResource("1_l5axl")]
+position = Vector2(960, 400)
+
+[node name="Card4" parent="." unique_id=405178612 instance=ExtResource("1_l5axl")]
+position = Vector2(1180, 400)
+
+[node name="Card5" parent="." unique_id=953542456 instance=ExtResource("1_l5axl")]
+position = Vector2(1400, 400)
+
+[node name="Card6" parent="." unique_id=470336236 instance=ExtResource("1_l5axl")]
+position = Vector2(1620, 400)
+
+[node name="Card7" parent="." unique_id=584304151 instance=ExtResource("1_l5axl")]
+position = Vector2(300, 400)
+
+[node name="TextureButton" type="TextureButton" parent="." unique_id=2001297111]
+offset_left = 795.0
+offset_top = 582.0
+offset_right = 1129.0
+offset_bottom = 790.0
+texture_normal = ExtResource("2_7t2lt")
+texture_disabled = ExtResource("3_sjmqg")
+ignore_texture_size = true
+stretch_mode = 0

@@ -2,29 +2,111 @@
 
 [ext_resource type="PackedScene" uid="uid://c2s7aywrd3dth" path="res://cards/scenes/card_manager.tscn" id="1_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://my3huekfu038" path="res://cards/scenes/player_hand.tscn" id="3_jyhfs"]
-[ext_resource type="PackedScene" uid="uid://xrfhh4p6pmp5" path="res://cards/scenes/card_slot.tscn" id="3_sugp2"]
 [ext_resource type="PackedScene" uid="uid://dbk7agsrxcp17" path="res://battle/scenes/input_manager.tscn" id="4_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://deck/scenes/deck.tscn" id="5_tbgi4"]
 [ext_resource type="Texture2D" uid="uid://bv5sodykfjwqi" path="res://cards/art/end_turn.png" id="6_tefeu"]
 [ext_resource type="PackedScene" uid="uid://c5c2toepivbq1" path="res://battle/scenes/battle_controller.tscn" id="7_o6xl0"]
+[ext_resource type="PackedScene" uid="uid://dstlgrhk8tge3" path="res://scenes/dummy.tscn" id="7_tipki"]
+[ext_resource type="PackedScene" uid="uid://1ey835hx28mh" path="res://scenes/player.tscn" id="8_85g3d"]
+[ext_resource type="Texture2D" uid="uid://dyf8s1g1iq4pg" path="res://Mana.png" id="9_85g3d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_bar"]
+content_margin_left = 20.0
+content_margin_top = 14.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
+bg_color = Color(0.0588235, 0.0784314, 0.117647, 0.9)
+border_width_bottom = 2
+border_color = Color(0.298039, 0.603922, 0.835294, 0.95)
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_combat_log_panel"]
+content_margin_left = 22.0
+content_margin_top = 22.0
+content_margin_right = 22.0
+content_margin_bottom = 22.0
+bg_color = Color(0.0823529, 0.101961, 0.141176, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.341176, 0.639216, 0.898039, 0.95)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
 [node name="main" type="Node2D" unique_id=2029937529]
+
+[node name="PlayerSide" type="Node2D" parent="." unique_id=1479227912]
+
+[node name="PlayerSprites" type="Node2D" parent="PlayerSide" unique_id=1830437564]
+
+[node name="Player" parent="PlayerSide/PlayerSprites" unique_id=2089395328 instance=ExtResource("8_85g3d")]
+position = Vector2(330, 421)
+scale = Vector2(2, 2)
+
+[node name="PlayerStats" type="Node" parent="PlayerSide" unique_id=965401508]
+
+[node name="PlayerDecks" type="Node2D" parent="PlayerSide" unique_id=333782746]
+
+[node name="PlayerHand" parent="PlayerSide/PlayerDecks" unique_id=1877208770 instance=ExtResource("3_jyhfs")]
+
+[node name="Deck" parent="PlayerSide/PlayerDecks" unique_id=642682178 instance=ExtResource("5_tbgi4")]
+position = Vector2(150, 890)
+
+[node name="Enemies" type="Node2D" parent="." unique_id=1136148551]
+
+[node name="EnemySprites" type="Node2D" parent="Enemies" unique_id=444786205]
+
+[node name="Dummy" parent="Enemies/EnemySprites" unique_id=1993765232 instance=ExtResource("7_tipki")]
+position = Vector2(1547, 437)
+scale = Vector2(2, 2)
+
+[node name="EnemyStats" type="Node" parent="Enemies" unique_id=1828906521]
+
+[node name="EnemyDecks" type="Node2D" parent="Enemies" unique_id=982477193]
 
 [node name="CardManager" parent="." unique_id=620233460 instance=ExtResource("1_0wfyh")]
 position = Vector2(-2, -2)
 
-[node name="CardSlot" parent="." unique_id=1408767343 instance=ExtResource("3_sugp2")]
-position = Vector2(363, 268)
-
-[node name="PlayerHand" parent="." unique_id=1877208770 instance=ExtResource("3_jyhfs")]
-
 [node name="InputManager" parent="." unique_id=529797179 instance=ExtResource("4_jyhfs")]
 
-[node name="Deck" parent="." unique_id=642682178 instance=ExtResource("5_tbgi4")]
-position = Vector2(150, 890)
+[node name="TurnLabel" type="Label" parent="." unique_id=1885200507]
+offset_left = 54.0
+offset_top = 110.0
+offset_right = 457.0
+offset_bottom = 144.0
+theme_override_font_sizes/font_size = 24
+text = "Your turn | Turn 1"
 
-[node name="CardSlot2" parent="." unique_id=228751927 instance=ExtResource("3_sugp2")]
-position = Vector2(607, 265)
+[node name="PlayerStatusLabel" type="Label" parent="." unique_id=944667198]
+offset_left = 54.0
+offset_top = 150.0
+offset_right = 778.0
+offset_bottom = 184.0
+theme_override_font_sizes/font_size = 20
+text = "Player HP: 20  Block: 0  Mana: 1/1  Spell: Ready  Fuse: 0"
+
+[node name="OpponentStatusLabel" type="Label" parent="." unique_id=948644375]
+offset_left = 54.0
+offset_top = 190.0
+offset_right = 608.0
+offset_bottom = 224.0
+theme_override_font_sizes/font_size = 20
+text = "Opponent HP: 20  Block: 0  Mana: 0/0"
+
+[node name="BattleLogLabel" type="Label" parent="." unique_id=898616620]
+offset_left = 54.0
+offset_top = 232.0
+offset_right = 901.0
+offset_bottom = 296.0
+theme_override_font_sizes/font_size = 18
+text = "Drag a spell onto a valid target to cast it."
+autowrap_mode = 3
 
 [node name="EndTurnButton" type="TextureButton" parent="." unique_id=1560200506]
 offset_left = 1676.0001
@@ -41,4 +123,148 @@ texture_hover = ExtResource("6_tefeu")
 [node name="BattleTimer" type="Timer" parent="." unique_id=1351592360]
 one_shot = true
 
+[node name="Mana" type="Sprite2D" parent="." unique_id=430450503]
+position = Vector2(211, 697)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("9_85g3d")
+region_rect = Rect2(27.12439, 31.907547, 81.5921, 79.5395)
+
+[node name="ManaCount" type="RichTextLabel" parent="Mana" unique_id=1492475132]
+z_index = 2
+offset_left = -200.00006
+offset_top = -250.00024
+offset_right = 189.99994
+offset_bottom = 169.99927
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/bold_font_size = 264
+bbcode_enabled = true
+text = "[b]1[/b]"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=785279492]
+
+[node name="HUDBar" type="PanelContainer" parent="CanvasLayer" unique_id=1242549583]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_bar")
+
+[node name="HUDMargin" type="MarginContainer" parent="CanvasLayer/HUDBar" unique_id=311654667]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="HUDRow" type="HBoxContainer" parent="CanvasLayer/HUDBar/HUDMargin" unique_id=1503314725]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="CombatLogButton" type="Button" parent="CanvasLayer/HUDBar/HUDMargin/HUDRow" unique_id=1002818864]
+custom_minimum_size = Vector2(146, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Combat Log"
+
+[node name="HUDTitle" type="Label" parent="CanvasLayer/HUDBar/HUDMargin/HUDRow" unique_id=1370425663]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.627451, 0.843137, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Mage Status"
+
+[node name="HealthLabel" type="Label" parent="CanvasLayer/HUDBar/HUDMargin/HUDRow" unique_id=1731867903]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.878431, 0.878431, 1)
+theme_override_font_sizes/font_size = 24
+text = "Health: 20 / 20"
+
+[node name="LevelLabel" type="Label" parent="CanvasLayer/HUDBar/HUDMargin/HUDRow" unique_id=1611291361]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0.933333, 0.768627, 1)
+theme_override_font_sizes/font_size = 24
+text = "Level: 1"
+
+[node name="ManaRegenLabel" type="Label" parent="CanvasLayer/HUDBar/HUDMargin/HUDRow" unique_id=1275831217]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.772549, 0.937255, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Mana Regen: +1 / turn"
+
+[node name="StageLabel" type="Label" parent="CanvasLayer/HUDBar/HUDMargin/HUDRow" unique_id=343373713]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85098, 1, 0.835294, 1)
+theme_override_font_sizes/font_size = 24
+text = "Stage: 1"
+
+[node name="CombatLogCanvasLayer" type="CanvasLayer" parent="." unique_id=947112003]
+layer = 5
+visible = false
+
+[node name="Backdrop" type="ColorRect" parent="CombatLogCanvasLayer" unique_id=661105148]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.62)
+
+[node name="CombatLogPanel" type="PanelContainer" parent="CombatLogCanvasLayer" unique_id=30803631]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -620.0
+offset_top = -320.0
+offset_right = 620.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_combat_log_panel")
+
+[node name="CombatLogMargin" type="MarginContainer" parent="CombatLogCanvasLayer/CombatLogPanel" unique_id=567997153]
+layout_mode = 2
+
+[node name="CombatLogVBox" type="VBoxContainer" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin" unique_id=1102621316]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CombatLogHeader" type="HBoxContainer" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox" unique_id=1355013048]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CombatLogTitle" type="Label" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogHeader" unique_id=343697972]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.898039, 0.94902, 1, 1)
+theme_override_font_sizes/font_size = 30
+text = "Combat Log"
+
+[node name="CloseCombatLogButton" type="Button" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogHeader" unique_id=1454280810]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Close"
+
+[node name="CombatLogSubtitle" type="Label" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox" unique_id=589313926]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.741176, 0.823529, 0.917647, 1)
+theme_override_font_sizes/font_size = 18
+text = "Spells played by both sides"
+
+[node name="CombatLogScroll" type="ScrollContainer" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox" unique_id=2104577476]
+custom_minimum_size = Vector2(0, 500)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CombatLogEntries" type="VBoxContainer" parent="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogScroll" unique_id=1767406939]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
 [connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/HUDBar/HUDMargin/HUDRow/CombatLogButton" to="BattleManager" method="_on_combat_log_button_pressed"]
+[connection signal="pressed" from="CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogHeader/CloseCombatLogButton" to="BattleManager" method="_on_close_combat_log_button_pressed"]

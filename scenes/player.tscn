@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://1ey835hx28mh"]
+
+[ext_resource type="Texture2D" uid="uid://nyprmfoyei0h" path="res://spritesheet.png" id="1_3vyb7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
+size = Vector2(77, 94)
+
+[node name="Player" type="Node2D" unique_id=2089395328]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1389727374]
+texture = ExtResource("1_3vyb7")
+region_enabled = true
+region_rect = Rect2(101.18182, 42.338837, 85.12396, 98.34711)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=2083649969]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=932156212]
+position = Vector2(-1.5, 1)
+shape = SubResource("RectangleShape2D_g2els")
