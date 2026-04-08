@@ -6,9 +6,13 @@
 [ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://deck/scenes/deck.tscn" id="5_tbgi4"]
 [ext_resource type="Texture2D" uid="uid://bv5sodykfjwqi" path="res://cards/art/end_turn.png" id="6_tefeu"]
 [ext_resource type="PackedScene" uid="uid://c5c2toepivbq1" path="res://battle/scenes/battle_controller.tscn" id="7_o6xl0"]
-[ext_resource type="PackedScene" uid="uid://dstlgrhk8tge3" path="res://scenes/dummy.tscn" id="7_tipki"]
+[ext_resource type="PackedScene" uid="uid://dvkror0e1sr7j" path="res://scenes/enemy.tscn" id="7_tipki"]
 [ext_resource type="PackedScene" uid="uid://1ey835hx28mh" path="res://scenes/player.tscn" id="8_85g3d"]
 [ext_resource type="Texture2D" uid="uid://dyf8s1g1iq4pg" path="res://Mana.png" id="9_85g3d"]
+[ext_resource type="PackedScene" path="res://battle/scenes/turn_panel.tscn" id="10_turn"]
+[ext_resource type="PackedScene" path="res://battle/scenes/player_vitals_panel.tscn" id="11_player_hud"]
+[ext_resource type="PackedScene" path="res://battle/scenes/opponent_vitals_panel.tscn" id="12_enemy_hud"]
+[ext_resource type="Texture2D" uid="uid://dkyteqb24s4yb" path="res://enemy_mana (2).png" id="13_trceg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_bar"]
 content_margin_left = 20.0
@@ -46,7 +50,7 @@ corner_radius_bottom_left = 20
 [node name="PlayerSprites" type="Node2D" parent="PlayerSide" unique_id=1830437564]
 
 [node name="Player" parent="PlayerSide/PlayerSprites" unique_id=2089395328 instance=ExtResource("8_85g3d")]
-position = Vector2(330, 421)
+position = Vector2(333, 433)
 scale = Vector2(2, 2)
 
 [node name="PlayerStats" type="Node" parent="PlayerSide" unique_id=965401508]
@@ -62,8 +66,8 @@ position = Vector2(150, 890)
 
 [node name="EnemySprites" type="Node2D" parent="Enemies" unique_id=444786205]
 
-[node name="Dummy" parent="Enemies/EnemySprites" unique_id=1993765232 instance=ExtResource("7_tipki")]
-position = Vector2(1547, 437)
+[node name="Enemy" parent="Enemies/EnemySprites" unique_id=1993765232 instance=ExtResource("7_tipki")]
+position = Vector2(1547, 449)
 scale = Vector2(2, 2)
 
 [node name="EnemyStats" type="Node" parent="Enemies" unique_id=1828906521]
@@ -75,44 +79,42 @@ position = Vector2(-2, -2)
 
 [node name="InputManager" parent="." unique_id=529797179 instance=ExtResource("4_jyhfs")]
 
-[node name="TurnLabel" type="Label" parent="." unique_id=1885200507]
-offset_left = 54.0
-offset_top = 110.0
-offset_right = 457.0
-offset_bottom = 144.0
-theme_override_font_sizes/font_size = 24
-text = "Your turn | Turn 1"
+[node name="TurnPanel" parent="." unique_id=1885200507 instance=ExtResource("10_turn")]
+offset_left = 1666.0
+offset_top = 785.0
+offset_right = 1958.6842
+offset_bottom = 895.0
+scale = Vector2(0.8307479, 0.85598963)
 
-[node name="PlayerStatusLabel" type="Label" parent="." unique_id=944667198]
-offset_left = 54.0
-offset_top = 150.0
-offset_right = 778.0
-offset_bottom = 184.0
-theme_override_font_sizes/font_size = 20
-text = "Player HP: 20  Block: 0  Mana: 1/1  Spell: Ready  Fuse: 0"
+[node name="PlayerVitalsPanel" parent="." unique_id=944667198 instance=ExtResource("11_player_hud")]
+offset_left = 84.00001
+offset_top = 134.0
+offset_right = 680.0
+offset_bottom = 331.0
+scale = Vector2(0.89363647, 0.8794833)
 
-[node name="OpponentStatusLabel" type="Label" parent="." unique_id=948644375]
-offset_left = 54.0
-offset_top = 190.0
-offset_right = 608.0
-offset_bottom = 224.0
-theme_override_font_sizes/font_size = 20
-text = "Opponent HP: 20  Block: 0  Mana: 0/0"
+[node name="OpponentVitalsPanel" parent="." unique_id=948644375 instance=ExtResource("12_enemy_hud")]
+offset_left = 1290.0
+offset_top = 122.99999
+offset_right = 1886.0
+offset_bottom = 320.0
+scale = Vector2(0.86521953, 0.84161454)
 
 [node name="BattleLogLabel" type="Label" parent="." unique_id=898616620]
-offset_left = 54.0
-offset_top = 232.0
-offset_right = 901.0
-offset_bottom = 296.0
+offset_left = 616.0
+offset_top = 111.0
+offset_right = 1267.0
+offset_bottom = 175.0
 theme_override_font_sizes/font_size = 18
 text = "Drag a spell onto a valid target to cast it."
+horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="EndTurnButton" type="TextureButton" parent="." unique_id=1560200506]
-offset_left = 1676.0001
-offset_top = 853.00006
-offset_right = 2296.0
-offset_bottom = 1269.0
+offset_left = 1660.0
+offset_top = 869.0
+offset_right = 2280.0
+offset_bottom = 1285.0
 scale = Vector2(0.40396252, 0.477939)
 texture_normal = ExtResource("6_tefeu")
 texture_pressed = ExtResource("6_tefeu")
@@ -131,14 +133,36 @@ region_rect = Rect2(27.12439, 31.907547, 81.5921, 79.5395)
 
 [node name="ManaCount" type="RichTextLabel" parent="Mana" unique_id=1492475132]
 z_index = 2
-offset_left = -200.00006
-offset_top = -250.00024
-offset_right = 189.99994
-offset_bottom = 169.99927
+offset_left = -270.00006
+offset_top = -300.00024
+offset_right = 119.99994
+offset_bottom = 119.99927
+scale = Vector2(1.2957267, 1.2681301)
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/bold_font_size = 264
 bbcode_enabled = true
 text = "[b]1[/b]"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="EnemyMana" type="Sprite2D" parent="." unique_id=1515613784]
+position = Vector2(1744.0001, 353)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("13_trceg")
+region_rect = Rect2(27.12439, 31.907547, 81.5921, 79.5395)
+
+[node name="EnemyManaCount" type="RichTextLabel" parent="EnemyMana" unique_id=722701342]
+z_index = 2
+offset_left = -125.00067
+offset_top = -134.99994
+offset_right = 264.99933
+offset_bottom = 284.99957
+scale = Vector2(0.6204503, 0.5749851)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/bold_font_size = 264
+bbcode_enabled = true
+text = "[b]0[/b]"
 horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_use_anchors_ = true
@@ -264,6 +288,19 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 14
+
+[node name="DefeatTransitionLayer" type="CanvasLayer" parent="." unique_id=1588221001]
+layer = 20
+visible = false
+
+[node name="DefeatFade" type="ColorRect" parent="DefeatTransitionLayer" unique_id=1751419101]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
 
 [connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/HUDBar/HUDMargin/HUDRow/CombatLogButton" to="BattleManager" method="_on_combat_log_button_pressed"]

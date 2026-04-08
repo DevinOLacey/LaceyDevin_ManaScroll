@@ -36,6 +36,8 @@ const MANIFEST_COLORS = [
 ]
 
 var hand_position
+var motion_tween: Tween
+var settle_tween: Tween
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -103,6 +105,7 @@ func set_visuals_visible(visible_state: bool) -> void:
 
 func manifest_to_position(target_position: Vector2, duration: float) -> void:
 	var safe_duration: float = maxf(duration, 0.01)
+	stop_motion_tweens()
 	var collision: CollisionShape2D = get_node_or_null("Area2D/CollisionShape2D")
 	if collision:
 		collision.disabled = true
@@ -115,21 +118,44 @@ func manifest_to_position(target_position: Vector2, duration: float) -> void:
 
 	_spawn_manifest_motes(safe_duration)
 
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(self, "position", target_position, safe_duration).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "scale", Vector2(1.06, 1.06), safe_duration * 0.72).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 1.0, safe_duration * 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "rotation_degrees", 0.0, safe_duration * 0.9).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	motion_tween = create_tween()
+	motion_tween.set_parallel(true)
+	motion_tween.tween_property(self, "position", target_position, safe_duration).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	motion_tween.tween_property(self, "scale", Vector2(1.06, 1.06), safe_duration * 0.72).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	motion_tween.tween_property(self, "modulate:a", 1.0, safe_duration * 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	motion_tween.tween_property(self, "rotation_degrees", 0.0, safe_duration * 0.9).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 
-	var settle_tween: Tween = create_tween()
+	settle_tween = create_tween()
 	settle_tween.tween_interval(safe_duration * 0.72)
 	settle_tween.tween_property(self, "scale", Vector2.ONE, safe_duration * 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	settle_tween.tween_callback(func():
 		if collision:
 			collision.disabled = false
 		z_index = 1
+		motion_tween = null
+		settle_tween = null
 	)
+
+
+func stop_motion_tweens(reset_transform: bool = false) -> void:
+	if motion_tween and is_instance_valid(motion_tween):
+		motion_tween.kill()
+	motion_tween = null
+
+	if settle_tween and is_instance_valid(settle_tween):
+		settle_tween.kill()
+	settle_tween = null
+
+	var collision: CollisionShape2D = get_node_or_null("Area2D/CollisionShape2D")
+	var is_removing: bool = has_meta("card_removing") and bool(get_meta("card_removing"))
+	if collision and not is_removing:
+		collision.disabled = false
+
+	if reset_transform:
+		scale = Vector2.ONE
+		rotation_degrees = 0.0
+		modulate = Color(1, 1, 1, 1)
+		z_index = 1
 
 
 func _spawn_manifest_motes(duration: float) -> void:

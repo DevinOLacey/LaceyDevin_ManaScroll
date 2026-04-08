@@ -33,6 +33,28 @@ const CARD_DEFINITIONS := {
 		"type": "[b]Enchant[/b]",
 		"effect": "combine",
 		"description": "Fuse the mana of 2 of the same spell together",
+	},
+	"splinter_bolt": {
+		"name": "Splinter Bolt",
+		"art": "res://cards/art/Splinter Bolt.png",
+		"cost": 0,
+		"category": "spell",
+		"target_group": "enemy",
+		"type": "[b]Spell[/b]",
+		"damage": 2,
+		"effect": null,
+		"description": "Launch a sharpened splinter dealing [i][b]2[/b] damage[/i]",
+	},
+	"wooden_ward": {
+		"name": "Wooden Ward",
+		"art": "res://cards/art/Wooden Ward.png",
+		"cost": 0,
+		"category": "spell",
+		"target_group": "ally",
+		"type": "[b]Spell[/b]",
+		"block": 1,
+		"effect": null,
+		"description": "Raise a simple bark ward [i]blocking [b]1[/b][/i] damage",
 	}
 }
 

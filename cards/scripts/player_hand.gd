@@ -7,6 +7,7 @@ const DEFAULT_DRAW_SPEED = 0.1
 const MANIFEST_DRAW_SPEED = 1
 const STARTING_HAND_BASE_DELAY = 0.08
 const STARTING_HAND_DELAY_VARIANCE = 0.07
+const DRAW_STAGGER_DELAY = 0.08
 
 var player_hand = []
 var center_screen_x
@@ -46,10 +47,14 @@ func add_cards_to_hand(cards: Array[Node2D], speed: float, manifest_new_cards: b
 		var hand_card = player_hand[i]
 		var new_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
 		hand_card.hand_position = new_position
-		if hand_card in added_cards and manifest_new_cards and hand_card.has_method("manifest_to_position"):
-			hand_card.manifest_to_position(new_position, MANIFEST_DRAW_SPEED)
-		else:
+		if hand_card not in added_cards or not manifest_new_cards:
 			animate_card_to_position(hand_card, new_position, speed)
+
+	if manifest_new_cards:
+		_manifest_added_cards_staggered(added_cards)
+	else:
+		for hand_card in added_cards:
+			animate_card_to_position(hand_card, hand_card.hand_position, speed)
 
 
 func get_max_hand_size() -> int:
@@ -118,6 +123,9 @@ func calculate_card_position_for_count(index: int, total_cards: int) -> float:
 
 
 func animate_card_to_position(card, target_position, speed, restore_collision_on_finish: bool = false):
+	if card and card.has_method("stop_motion_tweens"):
+		card.stop_motion_tweens(true)
+
 	var collision: CollisionShape2D = card.get_node_or_null("Area2D/CollisionShape2D")
 	if restore_collision_on_finish and collision:
 		collision.disabled = true
@@ -166,3 +174,17 @@ func _manifest_starting_hand(cards: Array[Node2D]) -> void:
 
 		var delay: float = STARTING_HAND_BASE_DELAY + randf_range(0.0, STARTING_HAND_DELAY_VARIANCE)
 		await get_tree().create_timer(delay).timeout
+
+
+func _manifest_added_cards_staggered(cards: Array[Node2D]) -> void:
+	for card in cards:
+		if not is_instance_valid(card):
+			continue
+
+		if card.has_method("manifest_to_position"):
+			card.manifest_to_position(card.hand_position, MANIFEST_DRAW_SPEED)
+		else:
+			animate_card_to_position(card, card.hand_position, MANIFEST_DRAW_SPEED)
+
+		if card != cards.back():
+			await get_tree().create_timer(DRAW_STAGGER_DELAY).timeout

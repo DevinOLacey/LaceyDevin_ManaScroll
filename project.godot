@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="LaceyDevin_ManaScroll"
-run/main_scene="uid://ddd3hdgfh1qfc"
+run/main_scene="res://ui/scenes/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
 [display]
