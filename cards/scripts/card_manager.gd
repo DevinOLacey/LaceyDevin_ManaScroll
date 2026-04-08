@@ -7,6 +7,7 @@ const RETURN_TO_HAND_SPEED = 0.1
 const CARD_BOTTOM_OFFSET = 144.0
 const HOVER_PREVIEW_SCENE = preload("res://cards/scenes/card_2_scale.tscn")
 const DECK_VIEW_CARD_META = "deck_view_card"
+const CARD_REMOVING_META = "card_removing"
 
 var card_drag
 var screen_size
@@ -89,11 +90,8 @@ func finish_drag():
 func discard_card(card):
 	if card == null:
 		return
-	if hovered_card == card:
-		set_hovered_card(null)
-	if card_drag == card:
-		hide_hover_preview()
-		card_drag = null
+	_prepare_card_for_removal(card)
+	clear_card_hover(card)
 	if player_hand_ref and player_hand_ref.has_method("has_card") and not player_hand_ref.has_card(card):
 		return
 	if battle_manager_ref and battle_manager_ref.has_method("discard_player_card_from_hand"):
@@ -112,6 +110,8 @@ func on_left_click_release():
 
 func on_hover_card(card):
 	if card_drag:
+		return
+	if card and card.has_meta(CARD_REMOVING_META) and card.get_meta(CARD_REMOVING_META):
 		return
 	if battle_manager_ref and battle_manager_ref.has_method("is_selection_active") and battle_manager_ref.is_selection_active():
 		return
@@ -180,6 +180,16 @@ func hide_hover_preview():
 		hover_preview = null
 
 
+func clear_card_hover(card = null) -> void:
+	if card == null or hovered_card == card:
+		set_hovered_card(null)
+	if card_drag == card:
+		hide_hover_preview()
+		card_drag = null
+	elif card == null:
+		hide_hover_preview()
+
+
 func _set_card_collision_disabled(card: Node2D, disabled: bool) -> void:
 	if card == null:
 		return
@@ -187,6 +197,15 @@ func _set_card_collision_disabled(card: Node2D, disabled: bool) -> void:
 	var collision: CollisionShape2D = card.get_node_or_null("Area2D/CollisionShape2D")
 	if collision:
 		collision.disabled = disabled
+
+
+func _prepare_card_for_removal(card: Node2D) -> void:
+	if card == null:
+		return
+	card.set_meta(CARD_REMOVING_META, true)
+	_set_card_collision_disabled(card, true)
+	if card.has_method("set_visuals_visible"):
+		card.set_visuals_visible(true)
 
 
 func raycast_check_for_target():
@@ -214,6 +233,8 @@ func raycast_check_for_card():
 		var filtered_cards: Array = []
 		for hit in result:
 			var card = hit.collider.get_parent()
+			if card.has_meta(CARD_REMOVING_META) and card.get_meta(CARD_REMOVING_META):
+				continue
 			var is_deck_view_card: bool = card.has_meta(DECK_VIEW_CARD_META) and card.get_meta(DECK_VIEW_CARD_META)
 			if deck_view_open and is_deck_view_card:
 				filtered_cards.append(hit)

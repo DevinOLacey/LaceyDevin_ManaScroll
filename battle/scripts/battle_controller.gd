@@ -1,32 +1,49 @@
 extends Node2D
 
 const CombatCardDatabase = preload("res://cards/data/card_database.gd")
+const EnemyDatabaseResource = preload("res://battle/data/enemy_database.gd")
 const SELECT_FROM_HAND_SCENE = preload("res://cards/scenes/select_from_hand.tscn")
 const CARD_SCENE = preload("res://cards/scenes/card.tscn")
 const PLAYER_SCENE = preload("res://scenes/player.tscn")
-const DUMMY_SCENE = preload("res://scenes/dummy.tscn")
+const ENEMY_SCENE = preload("res://scenes/enemy.tscn")
+const DEFEAT_SCENE_PATH := "res://ui/scenes/defeat_menu.tscn"
 
 const STARTING_HEALTH := 20
 const AI_ACTION_DELAY := 0.8
+const PLAYER_DEATH_ANIMATION_LEAD_TIME := 0.0
+const DEFEAT_TRANSITION_FADE_DURATION := 0.35
 
 var battle_timer: Timer
 var end_turn_button: TextureButton
 var deck_ref: Node
 var player_hand_ref: Node
 var player_target: Node2D
-var dummy_target: Node2D
-var turn_label: Label
+var enemy_sprites_ref: Node2D
+var enemy_target: Node2D
+var turn_state_label: Label
+var turn_number_label: Label
 var mana_counter_label: RichTextLabel
+var opponent_mana_counter_label: RichTextLabel
 var health_label: Label
 var level_label: Label
 var mana_regen_label: Label
 var stage_label: Label
-var player_status_label: Label
-var enemy_status_label: Label
+var player_name_label: Label
+var player_health_value_label: Label
+var player_health_bar: ProgressBar
+var player_block_label: Label
+var player_spell_actions_container: HBoxContainer
+var opponent_name_label: Label
+var opponent_health_value_label: Label
+var opponent_health_bar: ProgressBar
+var opponent_block_label: Label
+var opponent_spell_actions_container: HBoxContainer
 var battle_log_label: Label
 var selection_scene_ref: Node2D
 var combat_log_canvas_layer: CanvasLayer
 var combat_log_entries_container: VBoxContainer
+var defeat_transition_layer: CanvasLayer
+var defeat_transition_rect: ColorRect
 var combat_log_entries: Array[Dictionary] = []
 
 var player_turn_number := 1
@@ -37,18 +54,24 @@ var player_current_mana := 1
 var player_mana_regen := 1
 var opponent_max_mana := 0
 var opponent_current_mana := 0
+var opponent_mana_regen := 1
 var player_health := STARTING_HEALTH
+var opponent_max_health := STARTING_HEALTH
 var opponent_health := STARTING_HEALTH
 var current_stage_number := 1
 var player_block := 0
 var opponent_block := 0
-var player_spell_played := false
+var player_max_spell_actions := 1
+var player_remaining_spell_actions := 1
+var opponent_max_spell_actions := 1
+var opponent_remaining_spell_actions := 1
 var pending_fuse_charges := 0
 var active_side := "player"
 var resolving_turn := false
+var current_enemy_id := ""
+var current_enemy_data: Dictionary = {}
 
 var card_definitions := CombatCardDatabase.get_card_definitions()
-var card_draw_weights := CombatCardDatabase.get_card_draw_weights()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -58,19 +81,32 @@ func _ready() -> void:
 	end_turn_button = $"../EndTurnButton"
 	deck_ref = $"../PlayerSide/PlayerDecks/Deck"
 	player_hand_ref = $"../PlayerSide/PlayerDecks/PlayerHand"
-	turn_label = $"../TurnLabel"
+	enemy_sprites_ref = $"../Enemies/EnemySprites"
+	turn_state_label = $"../TurnPanel/TurnMargin/TurnVBox/TurnStateLabel"
+	turn_number_label = $"../TurnPanel/TurnMargin/TurnVBox/TurnNumberLabel"
 	mana_counter_label = $"../Mana/ManaCount"
+	opponent_mana_counter_label = get_node_or_null("../EnemyMana/EnemyManaCount")
 	health_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/HealthLabel"
 	level_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/LevelLabel"
 	mana_regen_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/ManaRegenLabel"
 	stage_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/StageLabel"
-	player_status_label = $"../PlayerStatusLabel"
-	enemy_status_label = $"../OpponentStatusLabel"
+	player_name_label = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerNameLabel"
+	player_health_value_label = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthValueLabel"
+	player_health_bar = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthRow/PlayerHealthBar"
+	player_block_label = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthRow/PlayerBlockLabel"
+	player_spell_actions_container = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerSpellActions"
+	opponent_name_label = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentNameLabel"
+	opponent_health_value_label = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentHealthValueLabel"
+	opponent_health_bar = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentHealthRow/OpponentHealthBar"
+	opponent_block_label = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentHealthRow/OpponentBlockLabel"
+	opponent_spell_actions_container = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentSpellActions"
 	battle_log_label = $"../BattleLogLabel"
 	combat_log_canvas_layer = $"../CombatLogCanvasLayer"
 	combat_log_entries_container = $"../CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogScroll/CombatLogEntries"
+	defeat_transition_layer = get_node_or_null("../DefeatTransitionLayer")
+	defeat_transition_rect = get_node_or_null("../DefeatTransitionLayer/DefeatFade")
 	player_target = $"../PlayerSide/PlayerSprites/Player"
-	dummy_target = $"../Enemies/EnemySprites/Dummy"
+	_spawn_enemy_for_stage(current_stage_number)
 	_begin_player_turn(true)
 
 
@@ -115,8 +151,8 @@ func try_play_card(card: Node2D, target: Node2D = null) -> bool:
 	var card_name: String = str(card_data.get("name", card.name))
 	var mana_cost: int = int(card_data.get("cost", 0))
 
-	if category == "spell" and player_spell_played:
-		_log_message("You can only cast 1 spell each turn.")
+	if category == "spell" and player_remaining_spell_actions <= 0:
+		_log_message("You have no spell actions left this turn.")
 		_update_hud()
 		return false
 
@@ -177,7 +213,7 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 		return false
 
 	player_current_mana -= total_cost
-	player_spell_played = true
+	player_remaining_spell_actions = maxi(0, player_remaining_spell_actions - 1)
 	_resolve_spell_effect(card_data, "player", target, effect_multiplier)
 
 	_discard_player_card(card)
@@ -201,14 +237,14 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 		if caster == "player":
 			_log_message("%s dealt %d damage to %s." % [card_name, damage_dealt, target_name])
 		else:
-			_log_message("Opponent cast %s on %s for %d damage." % [card_name, target_name, damage_dealt])
+			_log_message("%s cast %s on %s for %d damage." % [_get_current_enemy_name(), card_name, target_name, damage_dealt])
 	elif total_block > 0:
 		_add_block_to_target(target, total_block)
 		_append_combat_log(card_data, caster, target_name, 0, total_block)
 		if caster == "player":
 			_log_message("%s gave %s %d block." % [card_name, target_name, total_block])
 		else:
-			_log_message("Opponent gave %s %d block with %s." % [target_name, total_block, card_name])
+			_log_message("%s gave %s %d block with %s." % [_get_current_enemy_name(), target_name, total_block, card_name])
 
 	_update_hud()
 
@@ -248,17 +284,32 @@ func _run_opponent_turn() -> void:
 		return
 
 	_begin_opponent_turn()
-	var opponent_card := _choose_opponent_card()
-	if opponent_card.is_empty():
-		_log_message("Opponent could not act.")
-	else:
+	var acted_this_turn := false
+	while opponent_remaining_spell_actions > 0:
+		var opponent_card := _choose_opponent_card()
+		if opponent_card.is_empty():
+			if not acted_this_turn:
+				_log_message("%s could not act." % _get_current_enemy_name())
+			break
+
 		var card_data: Dictionary = card_definitions.get(opponent_card, {})
 		var mana_cost := int(card_data.get("cost", 0))
-		if mana_cost <= opponent_current_mana:
-			opponent_current_mana -= mana_cost
-			_resolve_spell_effect(card_data, "opponent", _get_default_target_for_opponent(card_data))
-		else:
-			_log_message("Opponent passed.")
+		if mana_cost > opponent_current_mana:
+			if not acted_this_turn:
+				_log_message("%s passed." % _get_current_enemy_name())
+			break
+
+		opponent_current_mana -= mana_cost
+		opponent_remaining_spell_actions = maxi(0, opponent_remaining_spell_actions - 1)
+		_resolve_spell_effect(card_data, "opponent", _get_default_target_for_opponent(card_data))
+		acted_this_turn = true
+
+		if _is_battle_over() or opponent_remaining_spell_actions <= 0:
+			break
+
+		_update_hud()
+		battle_timer.start()
+		await battle_timer.timeout
 
 	_update_hud()
 
@@ -274,7 +325,7 @@ func _run_opponent_turn() -> void:
 func _begin_player_turn(is_first_turn: bool) -> void:
 	resolving_turn = false
 	active_side = "player"
-	player_spell_played = false
+	player_remaining_spell_actions = player_max_spell_actions
 	pending_fuse_charges = 0
 
 	if is_first_turn:
@@ -295,18 +346,21 @@ func _begin_player_turn(is_first_turn: bool) -> void:
 func _begin_opponent_turn() -> void:
 	active_side = "opponent"
 	opponent_turn_number += 1
-	opponent_current_mana += 1
+	opponent_current_mana += opponent_mana_regen
 	opponent_max_mana = max(opponent_max_mana, opponent_current_mana)
-	_log_message("Opponent turn %d." % opponent_turn_number)
+	opponent_remaining_spell_actions = opponent_max_spell_actions
+	_log_message("%s turn %d." % [_get_current_enemy_name(), opponent_turn_number])
 	_update_hud()
 
 
 func _choose_opponent_card() -> String:
-	if opponent_health <= 8 and opponent_block == 0:
-		return "mana_shield"
+	var enemy_draw_weights: Dictionary = current_enemy_data.get("deck_weights", CombatCardDatabase.get_card_draw_weights())
+	var defensive_spell_id := str(current_enemy_data.get("defensive_spell_id", "mana_shield"))
+	if opponent_health <= 8 and opponent_block == 0 and enemy_draw_weights.has(defensive_spell_id):
+		return defensive_spell_id
 
 	var affordable_spells: Array[String] = []
-	for card_id: String in card_draw_weights.keys():
+	for card_id: String in enemy_draw_weights.keys():
 		var card_data: Dictionary = card_definitions.get(card_id, {})
 		if str(card_data.get("category", "")).to_lower() != "spell":
 			continue
@@ -318,12 +372,12 @@ func _choose_opponent_card() -> String:
 
 	var weighted_total := 0.0
 	for card_id in affordable_spells:
-		weighted_total += float(card_draw_weights.get(card_id, 0.0))
+		weighted_total += float(enemy_draw_weights.get(card_id, 0.0))
 
 	var roll := randf() * maxf(weighted_total, 0.001)
 	var running := 0.0
 	for card_id in affordable_spells:
-		running += float(card_draw_weights.get(card_id, 0.0))
+		running += float(enemy_draw_weights.get(card_id, 0.0))
 		if roll <= running:
 			return card_id
 
@@ -333,6 +387,11 @@ func _choose_opponent_card() -> String:
 func _discard_player_card(card: Node2D) -> void:
 	if card == null or not is_instance_valid(card):
 		return
+	var card_manager_ref := get_node_or_null("../CardManager")
+	if card_manager_ref and card_manager_ref.has_method("_prepare_card_for_removal"):
+		card_manager_ref._prepare_card_for_removal(card)
+	if card_manager_ref and card_manager_ref.has_method("clear_card_hover"):
+		card_manager_ref.clear_card_hover(card)
 	if player_hand_ref and player_hand_ref.has_method("remove_card_from_hand"):
 		player_hand_ref.remove_card_from_hand(card)
 	card.queue_free()
@@ -361,15 +420,24 @@ func _set_end_turn_enabled(enabled: bool) -> void:
 
 
 func _update_hud() -> void:
-	if turn_label:
-		var side_text := "Your turn"
+	if turn_state_label:
+		var side_text := "Your Turn"
 		if active_side == "opponent":
-			side_text = "Opponent turn"
-		turn_label.text = "%s | Turn %d" % [side_text, player_turn_number]
+			side_text = "%s Turn" % _get_current_enemy_name()
+		elif active_side == "finished":
+			side_text = "Battle Finished"
+		turn_state_label.text = side_text
+
+	if turn_number_label:
+		turn_number_label.text = "Turn %d" % player_turn_number
 
 	if mana_counter_label:
 		mana_counter_label.clear()
 		mana_counter_label.append_text("[center][b]%d[/b][/center]" % player_current_mana)
+
+	if opponent_mana_counter_label:
+		opponent_mana_counter_label.clear()
+		opponent_mana_counter_label.append_text("[center][b]%d[/b][/center]" % opponent_current_mana)
 
 	if health_label:
 		health_label.text = "Health: %d / %d" % [player_health, STARTING_HEALTH]
@@ -383,23 +451,47 @@ func _update_hud() -> void:
 	if stage_label:
 		stage_label.text = "Stage: %d" % current_stage_number
 
-	if player_status_label:
-		player_status_label.text = "Player HP: %d  Block: %d  Mana: %d/%d  Spell: %s  Fuse: %d" % [
-			player_health,
-			player_block,
-			player_current_mana,
-			player_max_mana,
-			"Used" if player_spell_played else "Ready",
-			pending_fuse_charges
-		]
+	if player_name_label:
+		player_name_label.text = "Player"
 
-	if enemy_status_label:
-		enemy_status_label.text = "Opponent HP: %d  Block: %d  Mana: %d/%d" % [
-			opponent_health,
-			opponent_block,
-			opponent_current_mana,
-			opponent_max_mana
-		]
+	if player_health_value_label:
+		player_health_value_label.text = "HP %d/%d" % [player_health, STARTING_HEALTH]
+
+	if player_health_bar:
+		player_health_bar.max_value = STARTING_HEALTH
+		player_health_bar.value = player_health
+
+	if player_block_label:
+		player_block_label.text = "Block %d" % player_block
+
+	_refresh_spell_action_pips(
+		player_spell_actions_container,
+		player_remaining_spell_actions,
+		player_max_spell_actions,
+		Color(0.36, 0.82, 1.0, 1.0),
+		Color(0.1, 0.18, 0.26, 0.88)
+	)
+
+	if opponent_name_label:
+		opponent_name_label.text = _get_current_enemy_name()
+
+	if opponent_health_value_label:
+		opponent_health_value_label.text = "HP %d/%d" % [opponent_health, opponent_max_health]
+
+	if opponent_health_bar:
+		opponent_health_bar.max_value = opponent_max_health
+		opponent_health_bar.value = opponent_health
+
+	if opponent_block_label:
+		opponent_block_label.text = "Block %d" % opponent_block
+
+	_refresh_spell_action_pips(
+		opponent_spell_actions_container,
+		opponent_remaining_spell_actions,
+		opponent_max_spell_actions,
+		Color(0.96, 0.38, 0.36, 1.0),
+		Color(0.28, 0.09, 0.09, 0.92)
+	)
 
 
 func _open_select_from_hand(action_config: Dictionary) -> void:
@@ -492,7 +584,7 @@ func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 
 	var summary_label := Label.new()
 	summary_label.text = "%s used %s on %s" % [
-		"Player" if str(entry.get("caster", "")) == "player" else "Enemy",
+		"Player" if str(entry.get("caster", "")) == "player" else _get_current_enemy_name(),
 		str(card_data.get("name", "Spell")),
 		str(entry.get("target_name", "Target"))
 	]
@@ -553,10 +645,14 @@ func _build_actor_preview(actor_key: String) -> Control:
 	var holder := Control.new()
 	holder.custom_minimum_size = Vector2(160, 180)
 
-	var actor_scene: PackedScene = PLAYER_SCENE if actor_key == "player" else DUMMY_SCENE
+	var actor_scene: PackedScene = PLAYER_SCENE if actor_key == "player" else ENEMY_SCENE
 	var actor_instance: Node2D = actor_scene.instantiate()
 	actor_instance.position = Vector2(80, 95)
-	actor_instance.scale = Vector2(1.7, 1.7)
+	if actor_key == "player":
+		actor_instance.scale = Vector2(1.7, 1.7)
+	elif actor_instance.has_method("apply_enemy_data"):
+		actor_instance.apply_enemy_data(current_enemy_id, current_enemy_data)
+		actor_instance.scale = Vector2(1.6, 1.6)
 	holder.add_child(actor_instance)
 
 	var collision: CollisionShape2D = actor_instance.get_node_or_null("Area2D/CollisionShape2D")
@@ -564,7 +660,7 @@ func _build_actor_preview(actor_key: String) -> Control:
 		collision.disabled = true
 
 	var name_label := Label.new()
-	name_label.text = "Player" if actor_key == "player" else "Enemy"
+	name_label.text = "Player" if actor_key == "player" else _get_current_enemy_name()
 	name_label.position = Vector2(42, 142)
 	name_label.add_theme_font_size_override("font_size", 18)
 	name_label.add_theme_color_override("font_color", Color(0.94, 0.97, 1.0, 1.0))
@@ -609,17 +705,37 @@ func _is_battle_over() -> bool:
 		_set_end_turn_enabled(false)
 		_log_message("You were defeated.")
 		_update_hud()
+		call_deferred("_show_defeat_screen")
 		return true
 
 	if opponent_health <= 0:
 		resolving_turn = true
 		active_side = "finished"
 		_set_end_turn_enabled(false)
-		_log_message("Opponent defeated.")
+		_log_message("%s defeated." % _get_current_enemy_name())
 		_update_hud()
 		return true
 
 	return false
+
+
+func _show_defeat_screen() -> void:
+	await _play_defeat_transition()
+	get_tree().change_scene_to_file(DEFEAT_SCENE_PATH)
+
+
+func _play_defeat_transition() -> void:
+	if PLAYER_DEATH_ANIMATION_LEAD_TIME > 0.0:
+		await get_tree().create_timer(PLAYER_DEATH_ANIMATION_LEAD_TIME).timeout
+
+	if defeat_transition_layer == null or defeat_transition_rect == null:
+		return
+
+	defeat_transition_layer.visible = true
+	defeat_transition_rect.color = Color(0, 0, 0, 0)
+	var tween := create_tween()
+	tween.tween_property(defeat_transition_rect, "color", Color(0, 0, 0, 1), DEFEAT_TRANSITION_FADE_DURATION)
+	await tween.finished
 
 
 func _can_open_fuse_selection() -> bool:
@@ -715,7 +831,7 @@ func _is_valid_player_target(card_data: Dictionary, target: Node2D) -> bool:
 
 	match str(card_data.get("target_group", "")).to_lower():
 		"enemy":
-			return target == dummy_target
+			return target == enemy_target
 		"ally", "self":
 			return target == player_target
 		_:
@@ -737,9 +853,9 @@ func _get_default_target_for_opponent(card_data: Dictionary) -> Node2D:
 		"enemy":
 			return player_target
 		"ally", "self":
-			return dummy_target
+			return enemy_target
 		_:
-			return dummy_target
+			return enemy_target
 
 
 func _get_target_key(target: Node2D) -> String:
@@ -751,8 +867,8 @@ func _get_target_key(target: Node2D) -> String:
 func _get_target_display_name(target: Node2D) -> String:
 	if target == player_target:
 		return "Player"
-	if target == dummy_target:
-		return "Dummy"
+	if target == enemy_target:
+		return _get_current_enemy_name()
 	return "Target"
 
 
@@ -780,3 +896,70 @@ func _set_block_value(target_key: String, value: int) -> void:
 		player_block = value
 	else:
 		opponent_block = value
+
+
+func _refresh_spell_action_pips(container: HBoxContainer, remaining: int, total: int, ready_color: Color, spent_color: Color) -> void:
+	if container == null:
+		return
+
+	total = maxi(total, 1)
+	if container.get_child_count() != total:
+		for child in container.get_children():
+			child.queue_free()
+		for index in range(total):
+			var pip := Panel.new()
+			pip.custom_minimum_size = Vector2(22, 22)
+			pip.name = "SpellActionPip%d" % index
+			container.add_child(pip)
+
+	for index in range(container.get_child_count()):
+		var pip_panel := container.get_child(index) as Panel
+		if pip_panel == null:
+			continue
+		pip_panel.add_theme_stylebox_override(
+			"panel",
+			_build_spell_action_style(ready_color if index < remaining else spent_color)
+		)
+
+
+func _build_spell_action_style(fill_color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill_color
+	style.border_color = Color(1, 0.95, 0.85, 0.42)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 999
+	style.corner_radius_top_right = 999
+	style.corner_radius_bottom_right = 999
+	style.corner_radius_bottom_left = 999
+	return style
+
+
+func _spawn_enemy_for_stage(stage_number: int) -> void:
+	current_enemy_data = EnemyDatabaseResource.get_enemy_for_stage(stage_number)
+	current_enemy_id = str(current_enemy_data.get("id", "training_dummy"))
+	opponent_max_health = int(current_enemy_data.get("max_health", STARTING_HEALTH))
+	opponent_health = opponent_max_health
+	opponent_block = 0
+	opponent_current_mana = int(current_enemy_data.get("starting_mana", 0))
+	opponent_max_mana = opponent_current_mana
+	opponent_mana_regen = int(current_enemy_data.get("mana_regen", 1))
+	opponent_turn_number = 0
+
+	if enemy_sprites_ref == null:
+		return
+
+	for child in enemy_sprites_ref.get_children():
+		child.queue_free()
+
+	enemy_target = ENEMY_SCENE.instantiate()
+	enemy_sprites_ref.add_child(enemy_target)
+	enemy_target.position = Vector2(1547, 437)
+	if enemy_target.has_method("apply_enemy_data"):
+		enemy_target.apply_enemy_data(current_enemy_id, current_enemy_data)
+
+
+func _get_current_enemy_name() -> String:
+	return str(current_enemy_data.get("name", "Enemy"))
