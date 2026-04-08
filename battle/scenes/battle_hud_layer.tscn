@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_bar"]
+content_margin_left = 20.0
+content_margin_top = 14.0
+content_margin_right = 20.0
+content_margin_bottom = 14.0
+bg_color = Color(0.0588235, 0.0784314, 0.117647, 0.9)
+border_width_bottom = 2
+border_color = Color(0.298039, 0.603922, 0.835294, 0.95)
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+
+[node name="BattleHUDLayer" type="CanvasLayer"]
+
+[node name="HUDBar" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_bar")
+
+[node name="HUDMargin" type="MarginContainer" parent="HUDBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="HUDRow" type="HBoxContainer" parent="HUDBar/HUDMargin"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="CombatLogButton" type="Button" parent="HUDBar/HUDMargin/HUDRow"]
+custom_minimum_size = Vector2(146, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Combat Log"
+
+[node name="HUDTitle" type="Label" parent="HUDBar/HUDMargin/HUDRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.627451, 0.843137, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Mage Status"
+
+[node name="HealthLabel" type="Label" parent="HUDBar/HUDMargin/HUDRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.878431, 0.878431, 1)
+theme_override_font_sizes/font_size = 24
+text = "Health: 20 / 20"
+
+[node name="LevelLabel" type="Label" parent="HUDBar/HUDMargin/HUDRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0.933333, 0.768627, 1)
+theme_override_font_sizes/font_size = 24
+text = "Level: 1"
+
+[node name="ManaRegenLabel" type="Label" parent="HUDBar/HUDMargin/HUDRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.772549, 0.937255, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Mana Regen: +1 / turn"
+
+[node name="StageLabel" type="Label" parent="HUDBar/HUDMargin/HUDRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85098, 1, 0.835294, 1)
+theme_override_font_sizes/font_size = 24
+text = "Stage: 1"

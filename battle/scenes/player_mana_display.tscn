@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://ctra3cf6tx17g"]
+
+[ext_resource type="Texture2D" path="res://battle/art/ui/player_mana.png" id="1_j1x1e"]
+
+[node name="Mana" type="Sprite2D"]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("1_j1x1e")
+region_rect = Rect2(27.12439, 31.907547, 81.5921, 79.5395)
+
+[node name="ManaCount" type="RichTextLabel" parent="."]
+z_index = 2
+offset_left = -270.00006
+offset_top = -300.00024
+offset_right = 119.99994
+offset_bottom = 119.99927
+scale = Vector2(1.2957267, 1.2681301)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/bold_font_size = 264
+bbcode_enabled = true
+text = "[b]1[/b]"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true

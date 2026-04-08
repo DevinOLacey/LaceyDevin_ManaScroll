@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyf8s1g1iq4pg"
-path="res://.godot/imported/Mana.png-99c55a5a0c6780fb74d353284b0c4d0b.ctex"
+uid="uid://d1rpl70hs0wxb"
+path="res://.godot/imported/training_dummy.png-a91754c0731ff1bb1f341b7e71ffdd85.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Mana.png"
-dest_files=["res://.godot/imported/Mana.png-99c55a5a0c6780fb74d353284b0c4d0b.ctex"]
+source_file="res://battle/art/actors/training_dummy.png"
+dest_files=["res://.godot/imported/training_dummy.png-a91754c0731ff1bb1f341b7e71ffdd85.ctex"]
 
 [params]
 

@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://s5e0ly5m8me"]
+
+[ext_resource type="Texture2D" path="res://battle/art/ui/enemy_mana.png" id="1_fl8vc"]
+
+[node name="EnemyMana" type="Sprite2D"]
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_fl8vc")
+region_rect = Rect2(27.12439, 31.907547, 81.5921, 79.5395)
+
+[node name="EnemyManaCount" type="RichTextLabel" parent="."]
+z_index = 2
+offset_left = -125.00067
+offset_top = -134.99994
+offset_right = 264.99933
+offset_bottom = 284.99957
+scale = Vector2(0.6204503, 0.5749851)
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/bold_font_size = 264
+bbcode_enabled = true
+text = "[b]0[/b]"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true

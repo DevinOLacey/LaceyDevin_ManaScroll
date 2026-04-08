@@ -4,7 +4,7 @@ class_name EnemyDatabase
 const ENEMY_DEFINITIONS := {
 	"training_dummy": {
 		"name": "Training Dummy",
-		"art": "res://dummy.png",
+		"art": "res://battle/art/actors/training_dummy.png",
 		"max_health": 18,
 		"starting_mana": 0,
 		"mana_regen": 0,
@@ -18,7 +18,7 @@ const ENEMY_DEFINITIONS := {
 	},
 	"bramble_husk": {
 		"name": "Bramble Husk",
-		"art": "res://dummy.png",
+		"art": "res://battle/art/actors/training_dummy.png",
 		"max_health": 22,
 		"starting_mana": 0.0,
 		"mana_regen": 0.5,
@@ -33,7 +33,7 @@ const ENEMY_DEFINITIONS := {
 	},
 	"ember_dummy": {
 		"name": "Ember Dummy",
-		"art": "res://dummy.png",
+		"art": "res://battle/art/actors/training_dummy.png",
 		"max_health": 16,
 		"starting_mana": 1,
 		"mana_regen": 2,

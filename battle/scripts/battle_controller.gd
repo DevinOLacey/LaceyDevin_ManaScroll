@@ -42,6 +42,7 @@ var battle_log_label: Label
 var selection_scene_ref: Node2D
 var combat_log_canvas_layer: CanvasLayer
 var combat_log_entries_container: VBoxContainer
+var combat_log_scroll_container: ScrollContainer
 var defeat_transition_layer: CanvasLayer
 var defeat_transition_rect: ColorRect
 var combat_log_entries: Array[Dictionary] = []
@@ -87,10 +88,10 @@ func _ready() -> void:
 	turn_number_label = $"../TurnPanel/TurnMargin/TurnVBox/TurnNumberLabel"
 	mana_counter_label = $"../Mana/ManaCount"
 	opponent_mana_counter_label = get_node_or_null("../EnemyMana/EnemyManaCount")
-	health_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/HealthLabel"
-	level_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/LevelLabel"
-	mana_regen_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/ManaRegenLabel"
-	stage_label = $"../CanvasLayer/HUDBar/HUDMargin/HUDRow/StageLabel"
+	health_label = $"../BattleHUDLayer/HUDBar/HUDMargin/HUDRow/HealthLabel"
+	level_label = $"../BattleHUDLayer/HUDBar/HUDMargin/HUDRow/LevelLabel"
+	mana_regen_label = $"../BattleHUDLayer/HUDBar/HUDMargin/HUDRow/ManaRegenLabel"
+	stage_label = $"../BattleHUDLayer/HUDBar/HUDMargin/HUDRow/StageLabel"
 	player_name_label = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerNameLabel"
 	player_health_value_label = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthValueLabel"
 	player_health_bar = $"../PlayerVitalsPanel/PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthRow/PlayerHealthBar"
@@ -102,8 +103,9 @@ func _ready() -> void:
 	opponent_block_label = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentHealthRow/OpponentBlockLabel"
 	opponent_spell_actions_container = $"../OpponentVitalsPanel/OpponentVitalsMargin/OpponentVitalsVBox/OpponentSpellActions"
 	battle_log_label = $"../BattleLogLabel"
-	combat_log_canvas_layer = $"../CombatLogCanvasLayer"
-	combat_log_entries_container = $"../CombatLogCanvasLayer/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogScroll/CombatLogEntries"
+	combat_log_canvas_layer = $"../CombatLogOverlay"
+	combat_log_entries_container = $"../CombatLogOverlay/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogScroll/CombatLogScrollMargin/CombatLogEntries"
+	combat_log_scroll_container = $"../CombatLogOverlay/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogScroll"
 	defeat_transition_layer = get_node_or_null("../DefeatTransitionLayer")
 	defeat_transition_rect = get_node_or_null("../DefeatTransitionLayer/DefeatFade")
 	player_target = $"../PlayerSide/PlayerSprites/Player"
@@ -121,6 +123,7 @@ func _on_combat_log_button_pressed() -> void:
 	_refresh_combat_log_overlay()
 	if combat_log_canvas_layer:
 		combat_log_canvas_layer.visible = true
+		call_deferred("_scroll_combat_log_to_top")
 
 
 func _on_close_combat_log_button_pressed() -> void:
@@ -185,7 +188,8 @@ func _play_player_enchantment(card: Node2D, card_data: Dictionary, mana_cost: in
 		return false
 
 	player_current_mana -= mana_cost
-	_append_combat_log(card_data, "player", "Player", 0, 0)
+	if str(card_data.get("effect", "")) != "combine":
+		_append_combat_log(card_data, "player", "Player", 0, 0)
 
 	if str(card_data.get("effect", "")) == "combine":
 		_log_message("Choose 2 matching spells to fuse.")
@@ -533,9 +537,24 @@ func _on_select_from_hand_confirmed(selected_cards: Array) -> void:
 		selection_scene_ref = null
 
 	if selected_cards.size() >= 2:
+		var fused_component_cards := _get_selected_card_snapshots(selected_cards)
 		var fused_card := _combine_selected_cards(selected_cards)
 		if fused_card:
 			var card_name := str(fused_card.get_meta("card_data", {}).get("name", fused_card.name))
+			_append_combat_log({
+				"id": "fuse_mana",
+				"name": "Fuse Mana",
+				"art": "res://cards/art/Fuse Mana.png",
+				"category": "enchantment",
+				"type": "[b]Enchant[/b]",
+				"description": "Fuse the mana of 2 of the same spell together",
+				"effect": "combine",
+				"fused_components": fused_component_cards,
+				"fusion_result": {
+					"card_id": str(fused_card.get_meta("card_id", "")),
+					"card_data": fused_card.get_meta("card_data", {}).duplicate(true),
+				},
+			}, "player", "", 0, 0)
 			_log_message("%s was fused into a stronger spell." % card_name)
 	_update_hud()
 
@@ -577,6 +596,8 @@ func _refresh_combat_log_overlay() -> void:
 	for index in range(combat_log_entries.size() - 1, -1, -1):
 		combat_log_entries_container.add_child(_build_combat_log_entry(combat_log_entries[index]))
 
+	call_deferred("_scroll_combat_log_to_top")
+
 
 func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 	var panel := PanelContainer.new()
@@ -584,31 +605,32 @@ func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 	panel.add_theme_stylebox_override("panel", _build_combat_log_style(str(entry.get("caster", ""))))
 
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 14)
+	root.add_theme_constant_override("separation", 18)
 	panel.add_child(root)
 
 	var top_row := HBoxContainer.new()
 	top_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	top_row.add_theme_constant_override("separation", 24)
+	top_row.custom_minimum_size = Vector2(0, 220)
 	root.add_child(top_row)
 
-	top_row.add_child(_build_actor_preview(str(entry.get("caster", ""))))
-	top_row.add_child(_build_card_preview(entry))
-	top_row.add_child(_build_actor_preview(_get_actor_key_for_target_name(str(entry.get("target_name", "")))))
+	var card_data: Dictionary = entry.get("card_data", {})
+	if str(card_data.get("effect", "")) == "combine":
+		for fusion_preview in _build_fusion_previews(card_data):
+			top_row.add_child(fusion_preview)
+	else:
+		top_row.add_child(_build_actor_preview(str(entry.get("caster", ""))))
+		top_row.add_child(_build_card_preview(entry))
+		if not str(entry.get("target_name", "")).is_empty():
+			top_row.add_child(_build_actor_preview(_get_actor_key_for_target_name(str(entry.get("target_name", "")))))
 
 	var details := VBoxContainer.new()
 	details.add_theme_constant_override("separation", 6)
 	root.add_child(details)
 
-	var card_data: Dictionary = entry.get("card_data", {})
-
 	var summary_label := Label.new()
-	summary_label.text = "%s used %s on %s" % [
-		"Player" if str(entry.get("caster", "")) == "player" else _get_current_enemy_name(),
-		str(card_data.get("name", "Spell")),
-		str(entry.get("target_name", "Target"))
-	]
-	summary_label.add_theme_font_size_override("font_size", 24)
+	summary_label.text = _build_combat_log_summary(entry, card_data)
+	summary_label.add_theme_font_size_override("font_size", 18)
 	summary_label.add_theme_color_override("font_color", Color(0.96, 0.98, 1.0, 1.0))
 	details.add_child(summary_label)
 
@@ -624,7 +646,7 @@ func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 		result_label.text = "Healing Done: %d" % heal_done
 	else:
 		result_label.text = "Effect resolved."
-	result_label.add_theme_font_size_override("font_size", 18)
+	result_label.add_theme_font_size_override("font_size", 16)
 	result_label.add_theme_color_override("font_color", Color(0.88, 0.94, 1.0, 1.0))
 	details.add_child(result_label)
 
@@ -639,19 +661,45 @@ func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 
 	var stats_label := Label.new()
 	stats_label.text = " | ".join(stats_text)
-	stats_label.add_theme_font_size_override("font_size", 16)
+	stats_label.add_theme_font_size_override("font_size", 14)
 	stats_label.add_theme_color_override("font_color", Color(0.69, 0.77, 0.87, 1.0))
 	details.add_child(stats_label)
+
+	var fused_components = card_data.get("fused_components", [])
+	if fused_components is Array and not fused_components.is_empty():
+		var fused_label := Label.new()
+		fused_label.text = "Fused from: %s" % " + ".join(PackedStringArray(_get_fused_component_names(card_data)))
+		fused_label.add_theme_font_size_override("font_size", 14)
+		fused_label.add_theme_color_override("font_color", Color(0.82, 0.88, 0.97, 1.0))
+		details.add_child(fused_label)
 
 	return panel
 
 
+func _build_combat_log_summary(entry: Dictionary, card_data: Dictionary) -> String:
+	var caster_name := "Player" if str(entry.get("caster", "")) == "player" else _get_current_enemy_name()
+	var card_name := str(card_data.get("name", "Spell"))
+	var target_name := str(entry.get("target_name", ""))
+	var fused_component_names := _get_fused_component_names(card_data)
+
+	if str(card_data.get("effect", "")) == "combine" and fused_component_names.size() >= 2:
+		var fusion_result_name := _get_fusion_result_name(card_data)
+		if not fusion_result_name.is_empty():
+			return "%s used %s to fuse %s with %s into %s" % [caster_name, card_name, fused_component_names[0], fused_component_names[1], fusion_result_name]
+		return "%s used %s to fuse %s with %s" % [caster_name, card_name, fused_component_names[0], fused_component_names[1]]
+
+	if target_name.is_empty():
+		return "%s used %s" % [caster_name, card_name]
+
+	return "%s used %s on %s" % [caster_name, card_name, target_name]
+
+
 func _build_card_preview(entry: Dictionary) -> Control:
 	var card_holder := Control.new()
-	card_holder.custom_minimum_size = Vector2(180, 200)
+	card_holder.custom_minimum_size = Vector2(180, 220)
 
 	var card_instance: Node2D = CARD_SCENE.instantiate()
-	card_instance.position = Vector2(90, 108)
+	card_instance.position = Vector2(90, 118)
 	card_instance.scale = Vector2(0.8, 0.8)
 	card_holder.add_child(card_instance)
 	if card_instance.has_method("apply_card_data"):
@@ -666,30 +714,51 @@ func _build_card_preview(entry: Dictionary) -> Control:
 	return card_holder
 
 
+func _build_card_preview_from_snapshot(card_snapshot: Dictionary) -> Control:
+	var preview_entry := {
+		"card_id": str(card_snapshot.get("card_id", "")),
+		"card_data": card_snapshot.get("card_data", {}).duplicate(true),
+	}
+	return _build_card_preview(preview_entry)
+
+
+func _build_fusion_previews(card_data: Dictionary) -> Array[Control]:
+	var previews: Array[Control] = []
+	previews.append(_build_card_preview({
+		"card_id": str(card_data.get("id", "fuse_mana")),
+		"card_data": card_data,
+	}))
+
+	var fused_components = card_data.get("fused_components", [])
+	if fused_components is Array:
+		for component in fused_components:
+			if component is Dictionary:
+				previews.append(_build_card_preview_from_snapshot(component))
+
+	var fusion_result = card_data.get("fusion_result", {})
+	if fusion_result is Dictionary and not fusion_result.is_empty():
+		previews.append(_build_card_preview_from_snapshot(fusion_result))
+
+	return previews
+
+
 func _build_actor_preview(actor_key: String) -> Control:
 	var holder := Control.new()
-	holder.custom_minimum_size = Vector2(160, 180)
+	holder.custom_minimum_size = Vector2(170, 220)
 
 	var actor_scene: PackedScene = PLAYER_SCENE if actor_key == "player" else ENEMY_SCENE
 	var actor_instance: Node2D = actor_scene.instantiate()
-	actor_instance.position = Vector2(80, 95)
+	actor_instance.position = Vector2(85, 118)
 	if actor_key == "player":
-		actor_instance.scale = Vector2(1.7, 1.7)
+		actor_instance.scale = Vector2(1.5, 1.5)
 	elif actor_instance.has_method("apply_enemy_data"):
 		actor_instance.apply_enemy_data(current_enemy_id, current_enemy_data)
-		actor_instance.scale = Vector2(1.6, 1.6)
+		actor_instance.scale = Vector2(1.35, 1.35)
 	holder.add_child(actor_instance)
 
 	var collision: CollisionShape2D = actor_instance.get_node_or_null("Area2D/CollisionShape2D")
 	if collision:
 		collision.disabled = true
-
-	var name_label := Label.new()
-	name_label.text = "Player" if actor_key == "player" else _get_current_enemy_name()
-	name_label.position = Vector2(42, 142)
-	name_label.add_theme_font_size_override("font_size", 18)
-	name_label.add_theme_color_override("font_color", Color(0.94, 0.97, 1.0, 1.0))
-	holder.add_child(name_label)
 
 	return holder
 
@@ -795,6 +864,7 @@ func _combine_selected_cards(selected_cards: Array) -> Node2D:
 	var combined_cost := 0
 	var combined_damage := 0
 	var combined_block := 0
+	var fused_components: Array[String] = []
 	for selected_card in selected_cards:
 		if selected_card == null or not is_instance_valid(selected_card):
 			continue
@@ -802,12 +872,14 @@ func _combine_selected_cards(selected_cards: Array) -> Node2D:
 		combined_cost += int(selected_data.get("cost", 0))
 		combined_damage += int(selected_data.get("damage", 0))
 		combined_block += int(selected_data.get("block", 0))
+		fused_components.append(str(selected_data.get("name", selected_card.name)))
 
 	combined_data["cost"] = combined_cost
 	if combined_damage > 0:
 		combined_data["damage"] = combined_damage
 	if combined_block > 0:
 		combined_data["block"] = combined_block
+	combined_data["fused_components"] = fused_components
 
 	var base_name := str(combined_data.get("name", primary_card.name))
 	if base_name.begins_with("Fused "):
@@ -828,6 +900,44 @@ func _combine_selected_cards(selected_cards: Array) -> Node2D:
 		player_hand_ref.update_hand_position(0.1)
 
 	return primary_card
+
+
+func _get_selected_card_snapshots(selected_cards: Array) -> Array[Dictionary]:
+	var selected_snapshots: Array[Dictionary] = []
+	for selected_card in selected_cards:
+		if selected_card == null or not is_instance_valid(selected_card):
+			continue
+		selected_snapshots.append({
+			"card_id": str(selected_card.get_meta("card_id", "")),
+			"card_data": selected_card.get_meta("card_data", {}).duplicate(true),
+		})
+	return selected_snapshots
+
+
+func _get_fusion_result_name(card_data: Dictionary) -> String:
+	var fusion_result = card_data.get("fusion_result", {})
+	if fusion_result is Dictionary:
+		var result_data: Dictionary = fusion_result.get("card_data", {})
+		return str(result_data.get("name", fusion_result.get("card_id", "")))
+	return ""
+
+
+func _scroll_combat_log_to_top() -> void:
+	if combat_log_scroll_container:
+		combat_log_scroll_container.scroll_vertical = 0
+
+
+func _get_fused_component_names(card_data: Dictionary) -> Array[String]:
+	var component_names: Array[String] = []
+	var fused_components = card_data.get("fused_components", [])
+	if fused_components is Array:
+		for component in fused_components:
+			if component is Dictionary:
+				var component_data: Dictionary = component.get("card_data", {})
+				component_names.append(str(component_data.get("name", component.get("card_id", "Spell"))))
+			else:
+				component_names.append(str(component))
+	return component_names
 
 
 func _build_fused_description(card_data: Dictionary) -> String:

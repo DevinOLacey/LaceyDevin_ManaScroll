@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://1ey835hx28mh"]
 
-[ext_resource type="Texture2D" uid="uid://nyprmfoyei0h" path="res://spritesheet.png" id="1_3vyb7"]
+[ext_resource type="Texture2D" path="res://battle/art/actors/player_spritesheet.png" id="1_3vyb7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
 size = Vector2(77, 94)

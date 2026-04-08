@@ -48,10 +48,12 @@ corner_radius_bottom_left = 999
 [node name="PlayerVitalsPanel" type="PanelContainer"]
 offset_right = 596.0
 offset_bottom = 152.0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="PlayerVitalsMargin" type="MarginContainer" parent="."]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 16
@@ -59,28 +61,33 @@ theme_override_constants/margin_bottom = 14
 
 [node name="PlayerVitalsVBox" type="VBoxContainer" parent="PlayerVitalsMargin"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 10
 
 [node name="PlayerNameLabel" type="Label" parent="PlayerVitalsMargin/PlayerVitalsVBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.97, 0.97, 0.97, 1)
 theme_override_font_sizes/font_size = 20
 text = "Player"
 
 [node name="PlayerHealthValueLabel" type="Label" parent="PlayerVitalsMargin/PlayerVitalsVBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.96, 0.92, 0.92, 1)
 theme_override_font_sizes/font_size = 18
 text = "HP 20/20"
 
 [node name="PlayerHealthRow" type="HBoxContainer" parent="PlayerVitalsMargin/PlayerVitalsVBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 12
 
 [node name="PlayerHealthBar" type="ProgressBar" parent="PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthRow"]
 custom_minimum_size = Vector2(430, 26)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_bar_background")
 theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fill")
 max_value = 20.0
@@ -90,21 +97,25 @@ show_percentage = false
 [node name="PlayerBlockLabel" type="Label" parent="PlayerVitalsMargin/PlayerVitalsVBox/PlayerHealthRow"]
 custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.97, 0.97, 0.97, 1)
 theme_override_font_sizes/font_size = 18
 text = "Block 0"
 
 [node name="PlayerSpellActionsLabel" type="Label" parent="PlayerVitalsMargin/PlayerVitalsVBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.97, 0.94, 0.9, 1)
 theme_override_font_sizes/font_size = 16
 text = "Spell Actions"
 
 [node name="PlayerSpellActions" type="HBoxContainer" parent="PlayerVitalsMargin/PlayerVitalsVBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 10
 
 [node name="SpellActionPip0" type="Panel" parent="PlayerVitalsMargin/PlayerVitalsVBox/PlayerSpellActions"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_spell_pip")

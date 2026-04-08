@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dvkror0e1sr7j"]
 
 [ext_resource type="Script" path="res://battle/scripts/enemy_actor.gd" id="1_cgo6m"]
-[ext_resource type="Texture2D" uid="uid://t2ddrondgy3o" path="res://dummy.png" id="2_fvr5m"]
+[ext_resource type="Texture2D" path="res://battle/art/actors/training_dummy.png" id="2_fvr5m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k5f3b"]
 size = Vector2(115, 134)

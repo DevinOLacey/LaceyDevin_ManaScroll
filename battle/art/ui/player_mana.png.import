@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dc2ohgxgetgcf"
-path="res://.godot/imported/background.png-98289422cd7d93003950872a7b97021f.ctex"
+uid="uid://3fxbp1il4wpy"
+path="res://.godot/imported/player_mana.png-97046559db57073829a16fc38f309c8c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://background.png"
-dest_files=["res://.godot/imported/background.png-98289422cd7d93003950872a7b97021f.ctex"]
+source_file="res://battle/art/ui/player_mana.png"
+dest_files=["res://.godot/imported/player_mana.png-97046559db57073829a16fc38f309c8c.ctex"]
 
 [params]
 
