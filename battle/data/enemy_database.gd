@@ -16,17 +16,19 @@ const ENEMY_DEFINITIONS := {
 			"wooden_ward": 0.22,
 		},
 	},
-	"warded_dummy": {
-		"name": "Warded Dummy",
+	"bramble_husk": {
+		"name": "Bramble Husk",
 		"art": "res://dummy.png",
-		"max_health": 24,
-		"starting_mana": 1,
-		"mana_regen": 1,
+		"max_health": 22,
+		"starting_mana": 0.0,
+		"mana_regen": 0.5,
 		"scale": Vector2(2.1, 2.1),
-		"tint": Color(0.76, 0.92, 1.0, 1.0),
+		"tint": Color(0.72, 0.86, 0.7, 1.0),
+		"defensive_spell_id": "thick_bark",
 		"deck_weights": {
-			"mana_bolt": 0.35,
-			"mana_shield": 0.65,
+			"bramble_snap": 0.45,
+			"thick_bark": 0.45,
+			"sap_mend": 0.10,
 		},
 	},
 	"ember_dummy": {
@@ -46,7 +48,7 @@ const ENEMY_DEFINITIONS := {
 
 const STAGE_ENEMIES := {
 	1: "training_dummy",
-	2: "warded_dummy",
+	2: "bramble_husk",
 	3: "ember_dummy",
 }
 

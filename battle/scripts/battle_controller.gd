@@ -54,7 +54,8 @@ var player_current_mana := 1
 var player_mana_regen := 1
 var opponent_max_mana := 0
 var opponent_current_mana := 0
-var opponent_mana_regen := 1
+var opponent_mana_regen := 1.0
+var opponent_mana_progress := 0.0
 var player_health := STARTING_HEALTH
 var opponent_max_health := STARTING_HEALTH
 var opponent_health := STARTING_HEALTH
@@ -229,22 +230,30 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 	var card_name: String = str(card_data.get("name", "Spell"))
 	var total_damage := int(card_data.get("damage", 0)) * multiplier
 	var total_block := int(card_data.get("block", 0)) * multiplier
+	var total_heal := int(card_data.get("heal", 0)) * multiplier
 	var target_name := _get_target_display_name(target)
 
 	if total_damage > 0:
 		var damage_dealt := _deal_damage_to_target(target, total_damage)
-		_append_combat_log(card_data, caster, target_name, damage_dealt, 0)
+		_append_combat_log(card_data, caster, target_name, damage_dealt, 0, 0)
 		if caster == "player":
 			_log_message("%s dealt %d damage to %s." % [card_name, damage_dealt, target_name])
 		else:
 			_log_message("%s cast %s on %s for %d damage." % [_get_current_enemy_name(), card_name, target_name, damage_dealt])
 	elif total_block > 0:
 		_add_block_to_target(target, total_block)
-		_append_combat_log(card_data, caster, target_name, 0, total_block)
+		_append_combat_log(card_data, caster, target_name, 0, total_block, 0)
 		if caster == "player":
 			_log_message("%s gave %s %d block." % [card_name, target_name, total_block])
 		else:
 			_log_message("%s gave %s %d block with %s." % [_get_current_enemy_name(), target_name, total_block, card_name])
+	elif total_heal > 0:
+		var healed_amount := _heal_target(target, total_heal)
+		_append_combat_log(card_data, caster, target_name, 0, 0, healed_amount)
+		if caster == "player":
+			_log_message("%s healed %s for %d." % [card_name, target_name, healed_amount])
+		else:
+			_log_message("%s healed %s for %d with %s." % [_get_current_enemy_name(), target_name, healed_amount, card_name])
 
 	_update_hud()
 
@@ -261,6 +270,15 @@ func _deal_damage_to_target(target: Node2D, amount: int) -> int:
 func _add_block_to_target(target: Node2D, amount: int) -> void:
 	var target_key := _get_target_key(target)
 	_set_block_value(target_key, _get_block_value(target_key) + amount)
+
+
+func _heal_target(target: Node2D, amount: int) -> int:
+	var target_key := _get_target_key(target)
+	var max_health := _get_max_health_value(target_key)
+	var current_health := _get_health_value(target_key)
+	var healed_amount := mini(amount, max_health - current_health)
+	_set_health_value(target_key, current_health + healed_amount)
+	return healed_amount
 
 
 func _end_player_turn(reason: String) -> void:
@@ -299,7 +317,8 @@ func _run_opponent_turn() -> void:
 				_log_message("%s passed." % _get_current_enemy_name())
 			break
 
-		opponent_current_mana -= mana_cost
+		opponent_mana_progress = maxf(0.0, opponent_mana_progress - float(mana_cost))
+		_sync_opponent_mana()
 		opponent_remaining_spell_actions = maxi(0, opponent_remaining_spell_actions - 1)
 		_resolve_spell_effect(card_data, "opponent", _get_default_target_for_opponent(card_data))
 		acted_this_turn = true
@@ -346,8 +365,8 @@ func _begin_player_turn(is_first_turn: bool) -> void:
 func _begin_opponent_turn() -> void:
 	active_side = "opponent"
 	opponent_turn_number += 1
-	opponent_current_mana += opponent_mana_regen
-	opponent_max_mana = max(opponent_max_mana, opponent_current_mana)
+	opponent_mana_progress += opponent_mana_regen
+	_sync_opponent_mana()
 	opponent_remaining_spell_actions = opponent_max_spell_actions
 	_log_message("%s turn %d." % [_get_current_enemy_name(), opponent_turn_number])
 	_update_hud()
@@ -526,7 +545,7 @@ func _log_message(message: String) -> void:
 		battle_log_label.text = message
 
 
-func _append_combat_log(card_data: Dictionary, caster: String, target_name: String, damage_done: int, block_done: int) -> void:
+func _append_combat_log(card_data: Dictionary, caster: String, target_name: String, damage_done: int, block_done: int, heal_done: int = 0) -> void:
 	combat_log_entries.append({
 		"card_id": str(card_data.get("id", card_data.get("name", ""))).to_lower().replace(" ", "_"),
 		"card_data": card_data.duplicate(true),
@@ -534,6 +553,7 @@ func _append_combat_log(card_data: Dictionary, caster: String, target_name: Stri
 		"target_name": target_name,
 		"damage_done": damage_done,
 		"block_done": block_done,
+		"heal_done": heal_done,
 	})
 	if combat_log_canvas_layer and combat_log_canvas_layer.visible:
 		_refresh_combat_log_overlay()
@@ -595,10 +615,13 @@ func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 	var result_label := Label.new()
 	var damage_done := int(entry.get("damage_done", 0))
 	var block_done := int(entry.get("block_done", 0))
+	var heal_done := int(entry.get("heal_done", 0))
 	if damage_done > 0:
 		result_label.text = "Damage Dealt: %d" % damage_done
 	elif block_done > 0:
 		result_label.text = "Block Granted: %d" % block_done
+	elif heal_done > 0:
+		result_label.text = "Healing Done: %d" % heal_done
 	else:
 		result_label.text = "Effect resolved."
 	result_label.add_theme_font_size_override("font_size", 18)
@@ -610,6 +633,8 @@ func _build_combat_log_entry(entry: Dictionary) -> PanelContainer:
 		stats_text.append("Base Damage: %d" % int(card_data.get("damage", 0)))
 	if int(card_data.get("block", 0)) > 0:
 		stats_text.append("Base Block: %d" % int(card_data.get("block", 0)))
+	if int(card_data.get("heal", 0)) > 0:
+		stats_text.append("Base Heal: %d" % int(card_data.get("heal", 0)))
 	stats_text.append("Cost: %d" % int(card_data.get("cost", 0)))
 
 	var stats_label := Label.new()
@@ -812,6 +837,8 @@ func _build_fused_description(card_data: Dictionary) -> String:
 		replacement_value = int(card_data.get("damage", 0))
 	elif int(card_data.get("block", 0)) > 0:
 		replacement_value = int(card_data.get("block", 0))
+	elif int(card_data.get("heal", 0)) > 0:
+		replacement_value = int(card_data.get("heal", 0))
 
 	if description.is_empty() or replacement_value <= 0:
 		return description
@@ -876,6 +903,12 @@ func _get_health_value(target_key: String) -> int:
 	if target_key == "player":
 		return player_health
 	return opponent_health
+
+
+func _get_max_health_value(target_key: String) -> int:
+	if target_key == "player":
+		return STARTING_HEALTH
+	return opponent_max_health
 
 
 func _set_health_value(target_key: String, value: int) -> void:
@@ -943,9 +976,10 @@ func _spawn_enemy_for_stage(stage_number: int) -> void:
 	opponent_max_health = int(current_enemy_data.get("max_health", STARTING_HEALTH))
 	opponent_health = opponent_max_health
 	opponent_block = 0
-	opponent_current_mana = int(current_enemy_data.get("starting_mana", 0))
-	opponent_max_mana = opponent_current_mana
-	opponent_mana_regen = int(current_enemy_data.get("mana_regen", 1))
+	opponent_mana_progress = float(current_enemy_data.get("starting_mana", 0.0))
+	opponent_mana_regen = float(current_enemy_data.get("mana_regen", 1.0))
+	opponent_max_mana = maxi(0, int(floor(opponent_mana_progress)))
+	_sync_opponent_mana()
 	opponent_turn_number = 0
 
 	if enemy_sprites_ref == null:
@@ -963,3 +997,8 @@ func _spawn_enemy_for_stage(stage_number: int) -> void:
 
 func _get_current_enemy_name() -> String:
 	return str(current_enemy_data.get("name", "Enemy"))
+
+
+func _sync_opponent_mana() -> void:
+	opponent_current_mana = maxi(0, int(floor(opponent_mana_progress)))
+	opponent_max_mana = max(opponent_max_mana, opponent_current_mana)
