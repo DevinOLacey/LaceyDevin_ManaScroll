@@ -3,6 +3,8 @@ extends Node2D
 signal hovered
 signal hovered_off
 
+const CardContentHelper = preload("res://cards/scripts/card_content_helper.gd")
+
 @export var registers_hover_signals := true
 @export_enum("Regular", "Scale2", "Scale4") var description_size_preset := 0
 
@@ -22,10 +24,6 @@ const DESCRIPTION_FONT_SIZE_SCALE_2 = 24
 const DRAW_CHANCE_FONT_SIZE_REGULAR = 4
 const DRAW_CHANCE_FONT_SIZE_SCALE_4 = 16
 #const DRAW_CHANCE_FONT_SIZE_SCALE_2 = DRAW_CHANCE_FONT_SIZE_REGULAR
-const LABEL_Z_INDEX = 5
-const MIN_AUTO_FIT_FONT_SIZE = 4
-
-
 const MANIFEST_START_OFFSET = Vector2(0, 48)
 const MANIFEST_START_SCALE = Vector2(0.35, 0.35)
 const MANIFEST_MOTE_COUNT = 14
@@ -41,8 +39,21 @@ var settle_tween: Tween
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	_apply_text_font_sizes()
-	_apply_label_z_index()
+	CardContentHelper.apply_text_font_sizes(self, description_size_preset, {
+		"title_regular": TITLE_FONT_SIZE_REGULAR,
+		"title_scale_2": TITLE_FONT_SIZE_SCALE_2,
+		"title_scale_4": TITLE_FONT_SIZE_SCALE_4,
+		"cost_regular": COST_FONT_SIZE_REGULAR,
+		"cost_scale_2": COST_FONT_SIZE_SCALE_2,
+		"cost_scale_4": COST_FONT_SIZE_SCALE_4,
+		"type_regular": TYPE_FONT_SIZE_REGULAR,
+		"type_scale_2": TYPE_FONT_SIZE_SCALE_2,
+		"type_scale_4": TYPE_FONT_SIZE_SCALE_4,
+		"description_regular": DESCRIPTION_FONT_SIZE_REGULAR,
+		"description_scale_2": DESCRIPTION_FONT_SIZE_SCALE_2,
+		"description_scale_4": DESCRIPTION_FONT_SIZE_SCALE_4,
+	})
+	CardContentHelper.apply_label_z_index(self)
 	if registers_hover_signals and get_parent().has_method("connect_card_signals"):
 		get_parent().connect_card_signals(self)
 	call_deferred("_auto_fit_all_labels")
@@ -62,45 +73,16 @@ func _on_area_2d_mouse_exited() -> void:
 
 
 func copy_display_from(source_card: Node2D) -> void:
-	_copy_sprite_branch(self, source_card)
-
-	for label_name in ["Name", "Cost", "Type", "Description", "DrawChance"]:
-		var target_label: RichTextLabel = get_node_or_null(label_name)
-		var source_label: RichTextLabel = source_card.get_node_or_null(label_name)
-		if target_label and source_label:
-			var label_text := _get_label_source_text(source_label)
-			_set_label_bbcode(target_label, label_text)
+	CardContentHelper.copy_display_from(self, source_card)
 
 
 func apply_card_data(card_id: String, card_data: Dictionary) -> void:
-	set_meta("card_id", card_id)
-	set_meta("card_data", card_data.duplicate(true))
-
-	var name_text: String = str(card_data.get("name", card_id))
-	var cost_text: String = str(card_data.get("cost", ""))
-	var type_text: String = str(card_data.get("type", ""))
-	var description_text: String = str(card_data.get("description", ""))
-	var art_source = card_data.get("art", null)
-
-	_set_label_text("Name", "[b]%s[/b]" % name_text)
-	_set_label_text("Cost", "[b]%s[/b]" % cost_text)
-	_set_label_text("Type", type_text)
-	_set_label_text("Description", description_text)
-	_set_label_text("DrawChance", "")
-	_set_art_texture(_resolve_texture(art_source))
+	CardContentHelper.apply_card_data(self, card_id, card_data)
 	call_deferred("_auto_fit_all_labels")
 
 
 func set_visuals_visible(visible_state: bool) -> void:
-	for sprite_path in ["Frame", "Art", "Sprite2D", "Sprite2D/Sprite2D"]:
-		var sprite: Sprite2D = get_node_or_null(sprite_path)
-		if sprite:
-			sprite.visible = visible_state
-
-	for label_name in ["Name", "Cost", "Type", "Description", "DrawChance"]:
-		var label: RichTextLabel = get_node_or_null(label_name)
-		if label:
-			label.visible = visible_state
+	CardContentHelper.set_visuals_visible(self, visible_state)
 
 
 func manifest_to_position(target_position: Vector2, duration: float) -> void:
@@ -188,187 +170,5 @@ func _random_manifest_point() -> Vector2:
 	return Vector2(cos(angle) * radius_x, sin(angle) * radius_y)
 
 
-func _apply_text_font_sizes() -> void:
-	_apply_label_font_size(get_node_or_null("Name"), _get_preset_font_size(TITLE_FONT_SIZE_REGULAR, TITLE_FONT_SIZE_SCALE_2, TITLE_FONT_SIZE_SCALE_4))
-	_apply_label_font_size(get_node_or_null("Cost"), _get_preset_font_size(COST_FONT_SIZE_REGULAR, COST_FONT_SIZE_SCALE_2, COST_FONT_SIZE_SCALE_4))
-	_apply_label_font_size(get_node_or_null("Type"), _get_preset_font_size(TYPE_FONT_SIZE_REGULAR, TYPE_FONT_SIZE_SCALE_2, TYPE_FONT_SIZE_SCALE_4))
-	_apply_label_font_size(get_node_or_null("Description"), _get_preset_font_size(DESCRIPTION_FONT_SIZE_REGULAR, DESCRIPTION_FONT_SIZE_SCALE_2, DESCRIPTION_FONT_SIZE_SCALE_4))
-	#_apply_label_font_size(get_node_or_null("DrawChance"), _get_preset_font_size(DRAW_CHANCE_FONT_SIZE_REGULAR, DRAW_CHANCE_FONT_SIZE_SCALE_2, DRAW_CHANCE_FONT_SIZE_SCALE_4))
-
-
-func _get_preset_font_size(regular_size: int, scale_2_size: int, scale_4_size: int) -> int:
-	if description_size_preset == 1:
-		return scale_2_size
-	if description_size_preset == 2:
-		return scale_4_size
-	return regular_size
-
-
-func _apply_label_font_size(label: RichTextLabel, font_size: int) -> void:
-	if label == null:
-		return
-
-	for font_key in [
-		"normal_font_size",
-		"bold_font_size",
-		"bold_italics_font_size",
-		"italics_font_size",
-		"mono_font_size",
-	]:
-		label.set("theme_override_font_sizes/%s" % font_key, font_size)
-
-
-func _apply_label_z_index() -> void:
-	for label_name in ["Name", "Cost", "Type", "Description", "DrawChance"]:
-		var label: RichTextLabel = get_node_or_null(label_name)
-		if label:
-			label.z_index = LABEL_Z_INDEX
-
-
-func _set_label_text(label_name: String, text_value: String) -> void:
-	var label: RichTextLabel = get_node_or_null(label_name)
-	if label:
-		_set_label_bbcode(label, text_value)
-
-
-func _set_label_bbcode(label: RichTextLabel, text_value: String) -> void:
-	if label == null:
-		return
-
-	label.set_meta("bbcode_source", text_value)
-	label.bbcode_enabled = true
-	label.clear()
-	if not text_value.is_empty():
-		label.append_text(text_value)
-	_fit_label_to_height(label)
-
-
-func _get_label_source_text(label: RichTextLabel) -> String:
-	if label == null:
-		return ""
-	if label.has_meta("bbcode_source"):
-		return str(label.get_meta("bbcode_source"))
-	return label.text
-
-
 func _auto_fit_all_labels() -> void:
-	var name_label: RichTextLabel = get_node_or_null("Name")
-	if name_label:
-		_fit_label_to_height(name_label)
-
-	var draw_chance_label: RichTextLabel = get_node_or_null("DrawChance")
-	if draw_chance_label:
-		_fit_label_to_height(draw_chance_label)
-
-	_fit_label_group_to_height([
-		get_node_or_null("Cost"),
-		get_node_or_null("Type"),
-		get_node_or_null("Description"),
-	])
-
-
-func _fit_label_to_height(label: RichTextLabel) -> void:
-	if label == null:
-		return
-
-	var starting_font_size_value = label.get("theme_override_font_sizes/normal_font_size")
-	if starting_font_size_value == null:
-		return
-
-	var starting_font_size: int = starting_font_size_value
-	if starting_font_size <= 0:
-		return
-
-	for font_size in range(starting_font_size, MIN_AUTO_FIT_FONT_SIZE - 1, -1):
-		_apply_label_font_size(label, font_size)
-		label.queue_redraw()
-		if label.get_content_height() <= label.size.y:
-			return
-
-
-func _fit_label_group_to_height(labels: Array) -> void:
-	var valid_labels: Array[RichTextLabel] = []
-	var starting_font_size := 0
-	for label_variant in labels:
-		var label := label_variant as RichTextLabel
-		if label == null:
-			continue
-		var font_size_value = label.get("theme_override_font_sizes/normal_font_size")
-		if font_size_value == null:
-			continue
-		valid_labels.append(label)
-		starting_font_size = max(starting_font_size, int(font_size_value))
-
-	if valid_labels.is_empty() or starting_font_size <= 0:
-		return
-
-	for font_size in range(starting_font_size, MIN_AUTO_FIT_FONT_SIZE - 1, -1):
-		for label in valid_labels:
-			_apply_label_font_size(label, font_size)
-			label.queue_redraw()
-
-		var all_fit := true
-		for label in valid_labels:
-			if label.get_content_height() > label.size.y:
-				all_fit = false
-				break
-
-		if all_fit:
-			return
-
-
-func _set_art_texture(texture: Texture2D) -> void:
-	var art_sprite: Sprite2D = get_node_or_null("Art")
-	if art_sprite == null:
-		art_sprite = get_node_or_null("Sprite2D/Sprite2D")
-	if art_sprite:
-		art_sprite.texture = texture
-
-
-func _resolve_texture(art_source) -> Texture2D:
-	if art_source is Texture2D:
-		return art_source
-
-	if art_source is String and not String(art_source).is_empty():
-		return load(String(art_source)) as Texture2D
-
-	return null
-
-
-func _copy_sprite_branch(target_root: Node, source_root: Node) -> void:
-	_copy_named_sprite(target_root, source_root, "Frame")
-	_copy_named_sprite(target_root, source_root, "Art")
-	_copy_named_sprite(target_root, source_root, "Sprite2D")
-
-	var target_sprite: Sprite2D = target_root.get_node_or_null("Sprite2D")
-	var source_sprite: Sprite2D = source_root.get_node_or_null("Sprite2D")
-	if target_sprite and source_sprite:
-		for source_child: Node in source_sprite.get_children():
-			if source_child is Sprite2D:
-				var target_child: Sprite2D = _find_sprite_child_by_name(target_sprite, String(source_child.name))
-				if target_child:
-					target_child.texture = source_child.texture
-					_copy_nested_sprite_children(target_child, source_child)
-
-
-func _copy_named_sprite(target_root: Node, source_root: Node, sprite_name: String) -> void:
-	var target_sprite: Sprite2D = target_root.get_node_or_null(sprite_name)
-	var source_sprite: Sprite2D = source_root.get_node_or_null(sprite_name)
-	if target_sprite and source_sprite:
-		target_sprite.texture = source_sprite.texture
-
-
-func _copy_nested_sprite_children(target_parent: Node, source_parent: Node) -> void:
-	for source_child: Node in source_parent.get_children():
-		if source_child is Sprite2D:
-			var target_child: Sprite2D = _find_sprite_child_by_name(target_parent, String(source_child.name))
-			if target_child:
-				target_child.texture = source_child.texture
-				_copy_nested_sprite_children(target_child, source_child)
-
-
-func _find_sprite_child_by_name(parent_node: Node, child_name: String) -> Sprite2D:
-	for child: Node in parent_node.get_children():
-		if child is Sprite2D and String(child.name) == child_name:
-			return child
-	return null
+	CardContentHelper.auto_fit_all_labels(self)
