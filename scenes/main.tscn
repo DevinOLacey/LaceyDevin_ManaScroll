@@ -49,7 +49,6 @@ scale = Vector2(2, 2)
 [node name="EnemyDecks" type="Node2D" parent="Enemies" unique_id=982477193]
 
 [node name="CardManager" parent="." unique_id=620233460 instance=ExtResource("1_0wfyh")]
-position = Vector2(-2, -2)
 
 [node name="InputManager" parent="." unique_id=529797179 instance=ExtResource("4_jyhfs")]
 
@@ -111,6 +110,6 @@ position = Vector2(1744.0001, 353)
 
 [node name="DefeatTransitionLayer" parent="." unique_id=1588221001 instance=ExtResource("16_defeat")]
 
-[connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]
 [connection signal="pressed" from="BattleHUDLayer/HUDBar/HUDMargin/HUDRow/CombatLogButton" to="BattleManager" method="_on_combat_log_button_pressed"]
 [connection signal="pressed" from="CombatLogOverlay/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogHeader/CloseCombatLogButton" to="BattleManager" method="_on_close_combat_log_button_pressed"]
+[connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]

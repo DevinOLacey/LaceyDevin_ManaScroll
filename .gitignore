@@ -2,3 +2,7 @@
 .godot/
 /android/
 *.tmp
+
+# Local repo guidance files
+AGENTS.md
+docs/script_boundaries.md
