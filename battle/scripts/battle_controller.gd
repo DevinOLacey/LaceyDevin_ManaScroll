@@ -396,7 +396,7 @@ func _begin_player_turn(is_first_turn: bool) -> void:
 
 	if is_first_turn:
 		player_turn_number = 1
-		player_current_mana = max(player_current_mana, 1)
+		player_current_mana = max(player_current_mana, player_mana_regen)
 	else:
 		player_turn_number += 1
 		if deck_ref and deck_ref.has_method("draw_up_to_max_hand_size"):
@@ -761,6 +761,8 @@ func _begin_new_stage_player_turn() -> void:
 	opponent_turn_number = 0
 	player_remaining_spell_actions = player_max_spell_actions
 	pending_fuse_charges = 0
+	player_current_mana = player_mana_regen
+	player_max_mana = max(player_max_mana, player_current_mana)
 
 	if deck_ref and deck_ref.has_method("draw_starting_hand"):
 		deck_ref.draw_starting_hand()
