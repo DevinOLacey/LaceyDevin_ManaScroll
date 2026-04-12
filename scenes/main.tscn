@@ -8,14 +8,15 @@
 [ext_resource type="PackedScene" uid="uid://c5c2toepivbq1" path="res://battle/scenes/battle_controller.tscn" id="7_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://dvkror0e1sr7j" path="res://scenes/enemy.tscn" id="7_tipki"]
 [ext_resource type="PackedScene" uid="uid://1ey835hx28mh" path="res://scenes/player.tscn" id="8_85g3d"]
-[ext_resource type="PackedScene" path="res://battle/scenes/player_mana_display.tscn" id="9_85g3d"]
+[ext_resource type="PackedScene" uid="uid://ctra3cf6tx17g" path="res://battle/scenes/player_mana_display.tscn" id="9_85g3d"]
 [ext_resource type="PackedScene" path="res://battle/scenes/turn_panel.tscn" id="10_turn"]
 [ext_resource type="PackedScene" path="res://battle/scenes/player_vitals_panel.tscn" id="11_player_hud"]
 [ext_resource type="PackedScene" path="res://battle/scenes/opponent_vitals_panel.tscn" id="12_enemy_hud"]
-[ext_resource type="PackedScene" path="res://battle/scenes/opponent_mana_display.tscn" id="13_trceg"]
+[ext_resource type="PackedScene" uid="uid://s5e0ly5m8me" path="res://battle/scenes/opponent_mana_display.tscn" id="13_trceg"]
 [ext_resource type="PackedScene" path="res://battle/scenes/battle_hud_layer.tscn" id="14_hud"]
 [ext_resource type="PackedScene" uid="uid://bwl0kadd6cjxx" path="res://battle/scenes/combat_log_overlay.tscn" id="15_log"]
 [ext_resource type="PackedScene" path="res://battle/scenes/defeat_transition_layer.tscn" id="16_defeat"]
+[ext_resource type="PackedScene" path="res://battle/scenes/battle_level_up_overlay.tscn" id="17_level_up"]
 
 [node name="main" type="Node2D" unique_id=2029937529]
 
@@ -24,7 +25,7 @@
 [node name="PlayerSprites" type="Node2D" parent="PlayerSide" unique_id=1830437564]
 
 [node name="Player" parent="PlayerSide/PlayerSprites" unique_id=2089395328 instance=ExtResource("8_85g3d")]
-position = Vector2(333, 433)
+position = Vector2(326, 503)
 scale = Vector2(2, 2)
 
 [node name="PlayerStats" type="Node" parent="PlayerSide" unique_id=965401508]
@@ -41,7 +42,7 @@ position = Vector2(150, 890)
 [node name="EnemySprites" type="Node2D" parent="Enemies" unique_id=444786205]
 
 [node name="Enemy" parent="Enemies/EnemySprites" unique_id=1993765232 instance=ExtResource("7_tipki")]
-position = Vector2(1547, 449)
+position = Vector2(1582, 534)
 scale = Vector2(2, 2)
 
 [node name="EnemyStats" type="Node" parent="Enemies" unique_id=1828906521]
@@ -60,17 +61,17 @@ offset_bottom = 895.0
 scale = Vector2(0.8307479, 0.85598963)
 
 [node name="PlayerVitalsPanel" parent="." unique_id=944667198 instance=ExtResource("11_player_hud")]
-offset_left = 84.00001
-offset_top = 134.0
-offset_right = 680.0
-offset_bottom = 331.0
+offset_left = 74.00001
+offset_top = 103.0
+offset_right = 670.0
+offset_bottom = 300.0
 scale = Vector2(0.89363647, 0.8794833)
 
 [node name="OpponentVitalsPanel" parent="." unique_id=948644375 instance=ExtResource("12_enemy_hud")]
 offset_left = 1290.0
-offset_top = 122.99999
+offset_top = 105.0
 offset_right = 1886.0
-offset_bottom = 320.0
+offset_bottom = 302.0
 scale = Vector2(0.86521953, 0.84161454)
 
 [node name="BattleLogLabel" type="Label" parent="." unique_id=898616620]
@@ -102,7 +103,7 @@ one_shot = true
 position = Vector2(211, 697)
 
 [node name="EnemyMana" parent="." unique_id=1515613784 instance=ExtResource("13_trceg")]
-position = Vector2(1744.0001, 353)
+position = Vector2(1854, 325)
 
 [node name="BattleHUDLayer" parent="." unique_id=785279492 instance=ExtResource("14_hud")]
 
@@ -110,6 +111,6 @@ position = Vector2(1744.0001, 353)
 
 [node name="DefeatTransitionLayer" parent="." unique_id=1588221001 instance=ExtResource("16_defeat")]
 
-[connection signal="pressed" from="BattleHUDLayer/HUDBar/HUDMargin/HUDRow/CombatLogButton" to="BattleManager" method="_on_combat_log_button_pressed"]
-[connection signal="pressed" from="CombatLogOverlay/CombatLogPanel/CombatLogMargin/CombatLogVBox/CombatLogHeader/CloseCombatLogButton" to="BattleManager" method="_on_close_combat_log_button_pressed"]
+[node name="BattleLevelUpOverlay" parent="." unique_id=2089627934 instance=ExtResource("17_level_up")]
+
 [connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]

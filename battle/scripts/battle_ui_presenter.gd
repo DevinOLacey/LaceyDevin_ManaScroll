@@ -62,6 +62,14 @@ static func update_hud(refs: Dictionary, state: Dictionary) -> void:
 	if player_block_label:
 		player_block_label.text = "Block %d" % int(state.get("player_block", 0))
 
+	var class_mechanics_panel := refs.get("class_mechanics_panel") as Control
+	var class_mechanics_label := refs.get("class_mechanics_label") as Label
+	var class_mechanics_text := str(state.get("class_mechanics_text", ""))
+	if class_mechanics_panel:
+		class_mechanics_panel.visible = not class_mechanics_text.is_empty()
+	if class_mechanics_label:
+		class_mechanics_label.text = class_mechanics_text
+
 	_refresh_spell_action_pips(
 		refs.get("player_spell_actions_container") as HBoxContainer,
 		int(state.get("player_remaining_spell_actions", 0)),
@@ -86,6 +94,14 @@ static func update_hud(refs: Dictionary, state: Dictionary) -> void:
 	var opponent_block_label := refs.get("opponent_block_label") as Label
 	if opponent_block_label:
 		opponent_block_label.text = "Block %d" % int(state.get("opponent_block", 0))
+
+	var opponent_ailments_panel := refs.get("opponent_ailments_panel") as Control
+	var opponent_ailments_label := refs.get("opponent_ailments_label") as Label
+	var opponent_ailments_text := str(state.get("opponent_ailments_text", ""))
+	if opponent_ailments_panel:
+		opponent_ailments_panel.visible = not opponent_ailments_text.is_empty()
+	if opponent_ailments_label:
+		opponent_ailments_label.text = opponent_ailments_text
 
 	_refresh_spell_action_pips(
 		refs.get("opponent_spell_actions_container") as HBoxContainer,

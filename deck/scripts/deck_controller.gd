@@ -15,6 +15,7 @@ var player_hand_ref
 var deck_view_ref: Node2D
 var deck_view_backdrop_ref: ColorRect
 var deck_view_layer_ref: CanvasLayer
+var card_draw_modifier: Callable
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -113,6 +114,10 @@ func draw_starting_hand() -> void:
 		push_error("PlayerHand is missing populate_starting_hand(). Check the PlayerHand scene script path.")
 
 
+func set_card_draw_modifier(modifier: Callable) -> void:
+	card_draw_modifier = modifier
+
+
 func _draw_card_instance() -> Node2D:
 	var card_drawn: String = _roll_weighted_card()
 	if card_drawn.is_empty():
@@ -122,6 +127,11 @@ func _draw_card_instance() -> Node2D:
 	if card_definition.is_empty():
 		push_error("Unknown card definition: %s" % card_drawn)
 		return null
+
+	if card_draw_modifier.is_valid():
+		var modified_result = card_draw_modifier.call(card_drawn, card_definition.duplicate(true))
+		if modified_result is Dictionary and not modified_result.is_empty():
+			card_definition = modified_result.get("card_data", card_definition)
 
 	var new_card: Node2D = CARD_SCENE.instantiate()
 	$"../../../CardManager".add_child(new_card)

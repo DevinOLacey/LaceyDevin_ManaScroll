@@ -114,6 +114,27 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
 
+[node name="OpponentAilmentsPanel" type="PanelContainer" parent="OpponentVitalsMargin/OpponentVitalsVBox"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bar_background")
+
+[node name="OpponentAilmentsMargin" type="MarginContainer" parent="OpponentVitalsMargin/OpponentVitalsVBox/OpponentAilmentsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="OpponentAilmentsLabel" type="Label" parent="OpponentVitalsMargin/OpponentVitalsVBox/OpponentAilmentsPanel/OpponentAilmentsMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.933333, 0.839216, 1)
+theme_override_font_sizes/font_size = 16
+text = "Ailments"
+autowrap_mode = 3
+
 [node name="SpellActionPip0" type="Panel" parent="OpponentVitalsMargin/OpponentVitalsVBox/OpponentSpellActions"]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2

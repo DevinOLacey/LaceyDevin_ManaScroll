@@ -7,9 +7,11 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 		"opponent_health": int(combat_state.get("opponent_health", 0)),
 		"player_block": int(combat_state.get("player_block", 0)),
 		"opponent_block": int(combat_state.get("opponent_block", 0)),
+		"player_ember_guard_active": bool(combat_state.get("player_ember_guard_active", false)),
 		"damage_done": 0,
 		"block_done": 0,
 		"heal_done": 0,
+		"ember_burn_to_attacker": 0,
 		"log_message": "",
 	}
 
@@ -19,8 +21,10 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 	var total_heal := int(card_data.get("heal", 0)) * multiplier
 
 	if total_damage > 0:
-		var damage_dealt := _deal_damage_to_target(target_key, total_damage, result)
+		var damage_resolution := _deal_damage_to_target(target_key, total_damage, result, caster)
+		var damage_dealt := int(damage_resolution.get("health_damage", 0))
 		result["damage_done"] = damage_dealt
+		result["ember_burn_to_attacker"] = int(damage_resolution.get("ember_burn_to_attacker", 0))
 		if caster == "player":
 			result["log_message"] = "%s dealt %d damage to %s." % [card_name, damage_dealt, target_name]
 		else:
@@ -43,12 +47,44 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 	return result
 
 
-static func _deal_damage_to_target(target_key: String, amount: int, state: Dictionary) -> int:
-	var blocked := mini(amount, _get_block_value(target_key, state))
-	_set_block_value(target_key, _get_block_value(target_key, state) - blocked, state)
-	var health_damage := amount - blocked
+static func apply_status_damage(target_key: String, amount: int, combat_state: Dictionary) -> Dictionary:
+	var result := {
+		"player_health": int(combat_state.get("player_health", 0)),
+		"opponent_health": int(combat_state.get("opponent_health", 0)),
+		"player_block": int(combat_state.get("player_block", 0)),
+		"opponent_block": int(combat_state.get("opponent_block", 0)),
+		"player_ember_guard_active": bool(combat_state.get("player_ember_guard_active", false)),
+		"health_damage": 0,
+		"ember_burn_to_attacker": 0,
+	}
+	var damage_resolution := _deal_damage_to_target(target_key, amount, result, "status")
+	result["health_damage"] = int(damage_resolution.get("health_damage", 0))
+	result["ember_burn_to_attacker"] = int(damage_resolution.get("ember_burn_to_attacker", 0))
+	return result
+
+
+static func _deal_damage_to_target(target_key: String, amount: int, state: Dictionary, caster: String) -> Dictionary:
+	var starting_block := _get_block_value(target_key, state)
+	var ember_guard_active := target_key == "player" and bool(state.get("player_ember_guard_active", false))
+	var block_loss_multiplier := 2 if ember_guard_active and starting_block > 0 else 1
+	var blocked_damage := mini(amount, int(floor(float(starting_block) / float(block_loss_multiplier))))
+	var block_spent := blocked_damage * block_loss_multiplier
+	_set_block_value(target_key, maxi(0, starting_block - block_spent), state)
+
+	var ember_burn_to_attacker := 0
+	if ember_guard_active and starting_block > 0 and caster == "opponent":
+		ember_burn_to_attacker = 1
+
+	var health_damage := amount - blocked_damage
 	_set_health_value(target_key, maxi(0, _get_health_value(target_key, state) - health_damage), state)
-	return health_damage
+
+	if ember_guard_active and _get_block_value(target_key, state) <= 0:
+		state["player_ember_guard_active"] = false
+
+	return {
+		"health_damage": health_damage,
+		"ember_burn_to_attacker": ember_burn_to_attacker,
+	}
 
 
 static func _add_block_to_target(target_key: String, amount: int, state: Dictionary) -> void:
