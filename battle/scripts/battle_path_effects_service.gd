@@ -3,9 +3,11 @@ extends RefCounted
 const CombatCardDatabase = preload("res://cards/data/card_database.gd")
 const BattleEnergyPathService = preload("res://battle/scripts/battle_energy_path_service.gd")
 const BattleFirePathService = preload("res://battle/scripts/battle_fire_path_service.gd")
+const BattleFrostPathService = preload("res://battle/scripts/battle_frost_path_service.gd")
 
 const PATH_OF_FLAME := "path_of_flame"
 const PATH_OF_ENERGY := "path_of_energy"
+const PATH_OF_FROST := "path_of_frost"
 
 
 static func create_runtime_state() -> Dictionary:
@@ -32,6 +34,8 @@ static func reset_for_new_stage(runtime_state: Dictionary) -> void:
 		runtime_state["path_states"][PATH_OF_FLAME] = _build_default_fire_state()
 	if has_path(runtime_state, PATH_OF_ENERGY):
 		runtime_state["path_states"][PATH_OF_ENERGY] = BattleEnergyPathService.build_default_state()
+	if has_path(runtime_state, PATH_OF_FROST):
+		runtime_state["path_states"][PATH_OF_FROST] = BattleFrostPathService.build_default_state()
 
 
 static func build_player_cast_resolution(runtime_state: Dictionary, card_id: String, card_data: Dictionary) -> Dictionary:
@@ -89,6 +93,29 @@ static func build_player_cast_resolution(runtime_state: Dictionary, card_id: Str
 					extra_messages.append(str(message))
 		result["extra_messages"] = extra_messages
 
+	if has_path(runtime_state, PATH_OF_FROST):
+		var frost_state := _get_frost_state(runtime_state)
+		var frost_resolution := BattleFrostPathService.build_player_cast_resolution(
+			card_id,
+			result.get("card_data", card_data),
+			frost_state,
+			true
+		)
+		result["card_data"] = frost_resolution.get("card_data", result.get("card_data", card_data))
+		frost_state["frost_stacks"] = int(frost_resolution.get("frost_stacks", frost_state.get("frost_stacks", 0)))
+		frost_state["chill_stacks"] = int(frost_resolution.get("chill_stacks", frost_state.get("chill_stacks", 0)))
+		frost_state["ice_bolt_primed"] = bool(frost_resolution.get("ice_bolt_primed", frost_state.get("ice_bolt_primed", false)))
+		frost_state["frost_armor_primed"] = bool(frost_resolution.get("frost_armor_primed", frost_state.get("frost_armor_primed", false)))
+		frost_state["frost_armor_charges"] = int(frost_resolution.get("frost_armor_charges", frost_state.get("frost_armor_charges", 0)))
+		_store_frost_state(runtime_state, frost_state)
+		var extra_messages: Array = result.get("extra_messages", [])
+		var frost_messages = frost_resolution.get("extra_messages", [])
+		if frost_messages is Array:
+			for message in frost_messages:
+				if not str(message).is_empty():
+					extra_messages.append(str(message))
+		result["extra_messages"] = extra_messages
+
 	return result
 
 
@@ -129,6 +156,22 @@ static func modify_drawn_card(runtime_state: Dictionary, card_id: String, base_c
 		result["card_id"] = str(modified_result.get("card_id", result.get("card_id", card_id)))
 		result["card_data"] = modified_result.get("card_data", result.get("card_data", base_card_data))
 
+	if has_path(runtime_state, PATH_OF_FROST):
+		var frost_state := _get_frost_state(runtime_state)
+		var modified_result := BattleFrostPathService.modify_drawn_card(
+			str(result.get("card_id", card_id)),
+			result.get("card_data", base_card_data),
+			true,
+			bool(frost_state.get("ice_bolt_primed", false)),
+			bool(frost_state.get("frost_armor_primed", false))
+		)
+		if bool(modified_result.get("consume_ice_bolt_primed", false)):
+			frost_state["ice_bolt_primed"] = false
+		if bool(modified_result.get("consume_frost_armor_primed", false)):
+			frost_state["frost_armor_primed"] = false
+		_store_frost_state(runtime_state, frost_state)
+		result["card_data"] = modified_result.get("card_data", result.get("card_data", base_card_data))
+
 	return result
 
 
@@ -144,6 +187,8 @@ static func decorate_card_data(runtime_state: Dictionary, card_id: String, card_
 			int(energy_state.get("unstable_discharge_bonus", 0)),
 			true
 		)
+	if has_path(runtime_state, PATH_OF_FROST):
+		updated_card_data = BattleFrostPathService.append_path_gain_text(card_id, updated_card_data)
 	return updated_card_data
 
 
@@ -165,6 +210,9 @@ static func get_class_mechanics_text(runtime_state: Dictionary) -> String:
 	if has_path(runtime_state, PATH_OF_ENERGY):
 		var energy_state := _get_energy_state(runtime_state)
 		mechanic_sections.append(BattleEnergyPathService.get_mechanics_text(energy_state))
+	if has_path(runtime_state, PATH_OF_FROST):
+		var frost_state := _get_frost_state(runtime_state)
+		mechanic_sections.append(BattleFrostPathService.get_mechanics_text(frost_state))
 
 	return "\n\n".join(mechanic_sections)
 
@@ -191,6 +239,20 @@ static func set_ember_guard_active(runtime_state: Dictionary, active: bool) -> v
 	_store_fire_state(runtime_state, fire_state)
 
 
+static func get_frost_armor_charges(runtime_state: Dictionary) -> int:
+	if not has_path(runtime_state, PATH_OF_FROST):
+		return 0
+	return int(_get_frost_state(runtime_state).get("frost_armor_charges", 0))
+
+
+static func set_frost_armor_charges(runtime_state: Dictionary, charges: int) -> void:
+	if not has_path(runtime_state, PATH_OF_FROST):
+		return
+	var frost_state := _get_frost_state(runtime_state)
+	frost_state["frost_armor_charges"] = maxi(0, charges)
+	_store_frost_state(runtime_state, frost_state)
+
+
 static func _get_fire_state(runtime_state: Dictionary) -> Dictionary:
 	var path_states = runtime_state.get("path_states", {})
 	var fire_state: Dictionary = path_states.get(PATH_OF_FLAME, _build_default_fire_state()).duplicate(true)
@@ -212,6 +274,18 @@ static func _get_energy_state(runtime_state: Dictionary) -> Dictionary:
 static func _store_energy_state(runtime_state: Dictionary, energy_state: Dictionary) -> void:
 	var path_states = runtime_state.get("path_states", {})
 	path_states[PATH_OF_ENERGY] = energy_state.duplicate(true)
+	runtime_state["path_states"] = path_states
+
+
+static func _get_frost_state(runtime_state: Dictionary) -> Dictionary:
+	var path_states = runtime_state.get("path_states", {})
+	var frost_state: Dictionary = path_states.get(PATH_OF_FROST, BattleFrostPathService.build_default_state()).duplicate(true)
+	return frost_state
+
+
+static func _store_frost_state(runtime_state: Dictionary, frost_state: Dictionary) -> void:
+	var path_states = runtime_state.get("path_states", {})
+	path_states[PATH_OF_FROST] = frost_state.duplicate(true)
 	runtime_state["path_states"] = path_states
 
 

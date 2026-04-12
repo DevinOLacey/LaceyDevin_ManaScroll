@@ -8,10 +8,13 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 		"player_block": int(combat_state.get("player_block", 0)),
 		"opponent_block": int(combat_state.get("opponent_block", 0)),
 		"player_ember_guard_active": bool(combat_state.get("player_ember_guard_active", false)),
+		"player_frost_armor_charges": int(combat_state.get("player_frost_armor_charges", 0)),
 		"damage_done": 0,
 		"block_done": 0,
 		"heal_done": 0,
 		"ember_burn_to_attacker": 0,
+		"frost_armor_reflected_damage": 0,
+		"frost_armor_charges_consumed": 0,
 		"log_message": "",
 	}
 
@@ -19,16 +22,30 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 	var total_damage := int(card_data.get("damage", 0)) * multiplier
 	var total_block := int(card_data.get("block", 0)) * multiplier
 	var total_heal := int(card_data.get("heal", 0)) * multiplier
+	var card_effect := str(card_data.get("effect", ""))
 
 	if total_damage > 0:
-		var damage_resolution := _deal_damage_to_target(target_key, total_damage, result, caster)
-		var damage_dealt := int(damage_resolution.get("health_damage", 0))
-		result["damage_done"] = damage_dealt
-		result["ember_burn_to_attacker"] = int(damage_resolution.get("ember_burn_to_attacker", 0))
-		if caster == "player":
-			result["log_message"] = "%s dealt %d damage to %s." % [card_name, damage_dealt, target_name]
+		if caster == "opponent" and target_key == "player" and int(result.get("player_frost_armor_charges", 0)) > 0:
+			var remaining_charges := maxi(0, int(result.get("player_frost_armor_charges", 0)) - 1)
+			result["player_frost_armor_charges"] = remaining_charges
+			result["frost_armor_charges_consumed"] = 1
+			var reflection_resolution := _deal_damage_to_target("opponent", total_damage, result, "reflection")
+			var reflected_damage := int(reflection_resolution.get("health_damage", 0))
+			result["frost_armor_reflected_damage"] = reflected_damage
+			result["damage_done"] = reflected_damage
+			result["log_message"] = "Frost Armor reflected %s back at %s for %d damage." % [card_name, enemy_name, reflected_damage]
 		else:
-			result["log_message"] = "%s cast %s on %s for %d damage." % [enemy_name, card_name, target_name, damage_dealt]
+			var damage_resolution := _resolve_damage(card_effect, target_key, total_damage, result, caster)
+			var damage_dealt := int(damage_resolution.get("health_damage", 0))
+			result["damage_done"] = damage_dealt
+			result["ember_burn_to_attacker"] = int(damage_resolution.get("ember_burn_to_attacker", 0))
+			if caster == "player":
+				if card_effect == "ice_bolt":
+					result["log_message"] = "%s shattered %s's block and dealt %d damage." % [card_name, target_name, damage_dealt]
+				else:
+					result["log_message"] = "%s dealt %d damage to %s." % [card_name, damage_dealt, target_name]
+			else:
+				result["log_message"] = "%s cast %s on %s for %d damage." % [enemy_name, card_name, target_name, damage_dealt]
 	elif total_block > 0:
 		_add_block_to_target(target_key, total_block, result)
 		result["block_done"] = total_block
@@ -43,6 +60,8 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 			result["log_message"] = "%s healed %s for %d." % [card_name, target_name, healed_amount]
 		else:
 			result["log_message"] = "%s healed %s for %d with %s." % [enemy_name, target_name, healed_amount, card_name]
+	elif card_effect == "frost_armor":
+		result["log_message"] = "%s wraps %s in Frost Armor." % [card_name, target_name]
 
 	return result
 
@@ -61,6 +80,12 @@ static func apply_status_damage(target_key: String, amount: int, combat_state: D
 	result["health_damage"] = int(damage_resolution.get("health_damage", 0))
 	result["ember_burn_to_attacker"] = int(damage_resolution.get("ember_burn_to_attacker", 0))
 	return result
+
+
+static func _resolve_damage(card_effect: String, target_key: String, amount: int, state: Dictionary, caster: String) -> Dictionary:
+	if card_effect == "ice_bolt":
+		return _deal_shatter_damage_to_target(target_key, amount, state)
+	return _deal_damage_to_target(target_key, amount, state, caster)
 
 
 static func _deal_damage_to_target(target_key: String, amount: int, state: Dictionary, caster: String) -> Dictionary:
@@ -84,6 +109,15 @@ static func _deal_damage_to_target(target_key: String, amount: int, state: Dicti
 	return {
 		"health_damage": health_damage,
 		"ember_burn_to_attacker": ember_burn_to_attacker,
+	}
+
+
+static func _deal_shatter_damage_to_target(target_key: String, amount: int, state: Dictionary) -> Dictionary:
+	_set_block_value(target_key, 0, state)
+	_set_health_value(target_key, maxi(0, _get_health_value(target_key, state) - amount), state)
+	return {
+		"health_damage": amount,
+		"ember_burn_to_attacker": 0,
 	}
 
 
