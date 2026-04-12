@@ -1,0 +1,90 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://battle/scripts/battle_level_up_overlay.gd" id="1_overlay"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.0588235, 0.0784314, 0.117647, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.980392, 0.835294, 0.423529, 0.88)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 18
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
+
+[node name="BattleLevelUpOverlay" type="CanvasLayer"]
+layer = 6
+visible = false
+script = ExtResource("1_overlay")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Backdrop" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Modal" type="PanelContainer" parent="Root/Center"]
+custom_minimum_size = Vector2(1180, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="ModalMargin" type="MarginContainer" parent="Root/Center/Modal"]
+layout_mode = 2
+
+[node name="ModalVBox" type="VBoxContainer" parent="Root/Center/Modal/ModalMargin"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Eyebrow" type="Label" parent="Root/Center/Modal/ModalMargin/ModalVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.858824, 0.509804, 1)
+theme_override_font_sizes/font_size = 22
+text = "LEVEL UP"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Root/Center/Modal/ModalMargin/ModalVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.972549, 0.980392, 1, 1)
+theme_override_font_sizes/font_size = 46
+text = "Choose Your Next Path"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Root/Center/Modal/ModalMargin/ModalVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.772549, 0.854902, 0.941176, 1)
+theme_override_font_sizes/font_size = 20
+text = "The duel lingers behind you. Shape what the next victory means."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OptionsRow" type="HBoxContainer" parent="Root/Center/Modal/ModalMargin/ModalVBox"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1

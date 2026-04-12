@@ -2,6 +2,8 @@ extends Node2D
 
 signal selection_confirmed(selected_cards: Array)
 
+const BattleFusionService = preload("res://battle/scripts/battle_fusion_service.gd")
+
 const ROW_Y := 400.0
 const LAYOUT_SPEED := 0.15
 const BASE_SCALE := Vector2.ONE
@@ -96,7 +98,7 @@ func _is_card_selectable(source_card: Node2D) -> bool:
 
 	if require_matching_card_id and not selected_cards.is_empty() and source_card not in selected_cards:
 		var first_selected_card := selected_cards[0]
-		if first_selected_card and str(source_card.get_meta("card_id", "")) != str(first_selected_card.get_meta("card_id", "")):
+		if first_selected_card and BattleFusionService.get_fusion_match_id(source_card) != BattleFusionService.get_fusion_match_id(first_selected_card):
 			return false
 
 	return true
@@ -107,11 +109,11 @@ func _is_selection_complete() -> bool:
 		return false
 
 	if require_matching_card_id and selected_cards.size() > 1:
-		var first_card_id := str(selected_cards[0].get_meta("card_id", ""))
+		var first_card_id := BattleFusionService.get_fusion_match_id(selected_cards[0])
 		for source_card in selected_cards:
 			if source_card == null or not is_instance_valid(source_card):
 				return false
-			if str(source_card.get_meta("card_id", "")) != first_card_id:
+			if BattleFusionService.get_fusion_match_id(source_card) != first_card_id:
 				return false
 
 	return true

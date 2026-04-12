@@ -72,7 +72,6 @@ static func auto_fit_all_labels(card: Node2D) -> void:
 		fit_label_to_height(draw_chance_label)
 
 	fit_label_group_to_height([
-		card.get_node_or_null("Cost"),
 		card.get_node_or_null("Type"),
 		card.get_node_or_null("Description"),
 	])
