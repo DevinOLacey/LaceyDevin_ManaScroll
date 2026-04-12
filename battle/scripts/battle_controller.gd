@@ -255,11 +255,18 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 		for message in path_messages:
 			if not str(message).is_empty():
 				extra_messages.append(str(message))
+	var granted_spell_actions := int(path_resolution.get("grant_spell_actions", 0))
+	if granted_spell_actions > 0:
+		player_max_spell_actions += granted_spell_actions
+		player_remaining_spell_actions += granted_spell_actions
+		extra_messages.append("You gain %d extra spell action%s for the rest of combat." % [granted_spell_actions, "" if granted_spell_actions == 1 else "s"])
 	var burn_to_target := int(path_resolution.get("burn_to_target", 0))
 	if burn_to_target > 0:
 		var burn_message := _apply_burn_to_target(BattleTargeting.get_target_key(target, player_target), burn_to_target)
 		if not burn_message.is_empty():
 			extra_messages.append(burn_message)
+	if bool(path_resolution.get("refresh_hand_cards", false)):
+		_refresh_player_hand_path_cards(card)
 
 	_discard_player_card(card)
 
@@ -806,7 +813,7 @@ func _modify_drawn_player_card(card_id: String, base_card_data: Dictionary) -> D
 
 
 func _apply_path_text_to_card(card: Node2D) -> void:
-	if card == null or not is_instance_valid(card) or not _has_path("path_of_flame"):
+	if card == null or not is_instance_valid(card):
 		return
 
 	var card_id := str(card.get_meta("card_id", ""))
@@ -817,6 +824,16 @@ func _apply_path_text_to_card(card: Node2D) -> void:
 	var updated_card_data := BattlePathEffectsService.decorate_card_data(player_path_runtime, card_id, card_data)
 	if card.has_method("apply_card_data"):
 		card.apply_card_data(card_id, updated_card_data)
+
+
+func _refresh_player_hand_path_cards(excluded_card: Node2D = null) -> void:
+	if player_hand_ref == null or not player_hand_ref.has_method("get_cards"):
+		return
+
+	for hand_card in player_hand_ref.get_cards():
+		if hand_card == excluded_card or hand_card == null or not is_instance_valid(hand_card):
+			continue
+		_apply_path_text_to_card(hand_card)
 
 
 func _apply_burn_to_target(target_key: String, amount: int) -> String:

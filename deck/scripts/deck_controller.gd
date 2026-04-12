@@ -131,6 +131,7 @@ func _draw_card_instance() -> Node2D:
 	if card_draw_modifier.is_valid():
 		var modified_result = card_draw_modifier.call(card_drawn, card_definition.duplicate(true))
 		if modified_result is Dictionary and not modified_result.is_empty():
+			card_drawn = str(modified_result.get("card_id", card_drawn))
 			card_definition = modified_result.get("card_data", card_definition)
 
 	var new_card: Node2D = CARD_SCENE.instantiate()
