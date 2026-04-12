@@ -258,7 +258,6 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 	var granted_spell_actions := int(path_resolution.get("grant_spell_actions", 0))
 	if granted_spell_actions > 0:
 		player_max_spell_actions += granted_spell_actions
-		player_remaining_spell_actions += granted_spell_actions
 		extra_messages.append("You gain %d extra spell action%s for the rest of combat." % [granted_spell_actions, "" if granted_spell_actions == 1 else "s"])
 	var burn_to_target := int(path_resolution.get("burn_to_target", 0))
 	if burn_to_target > 0:
@@ -297,6 +296,7 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 			"player_max_health": STARTING_HEALTH,
 			"player_block": player_block,
 			"player_ember_guard_active": BattlePathEffectsService.is_ember_guard_active(player_path_runtime),
+			"player_frost_armor_charges": BattlePathEffectsService.get_frost_armor_charges(player_path_runtime),
 			"opponent_health": opponent_health,
 			"opponent_max_health": opponent_max_health,
 			"opponent_block": opponent_block,
@@ -308,6 +308,7 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 	player_block = int(resolution.get("player_block", player_block))
 	opponent_block = int(resolution.get("opponent_block", opponent_block))
 	BattlePathEffectsService.set_ember_guard_active(player_path_runtime, bool(resolution.get("player_ember_guard_active", BattlePathEffectsService.is_ember_guard_active(player_path_runtime))))
+	BattlePathEffectsService.set_frost_armor_charges(player_path_runtime, int(resolution.get("player_frost_armor_charges", BattlePathEffectsService.get_frost_armor_charges(player_path_runtime))))
 	_append_combat_log(
 		card_data,
 		caster,

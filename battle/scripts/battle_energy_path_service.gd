@@ -1,7 +1,7 @@
 extends RefCounted
 
 const CHARGE_THRESHOLD := 10
-const SHOCK_THRESHOLD := 2
+const SHOCK_THRESHOLD := 4
 const ACCELERATE_MANA_GATES_CARD_ID := "accelerate_mana_gates"
 const UNSTABLE_DISCHARGE_CARD_ID := "unstable_discharge"
 
