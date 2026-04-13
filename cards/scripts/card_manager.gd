@@ -5,6 +5,7 @@ const COLLISON_MASK_TARGET = 8
 const DEFAULT_DRAW_SPEED = 0.1
 const RETURN_TO_HAND_SPEED = 0.1
 const CARD_BOTTOM_OFFSET = 144.0
+const DRAG_Z_INDEX = 20
 const HOVER_PREVIEW_SCENE = preload("res://cards/scenes/card_2_scale.tscn")
 const DECK_VIEW_CARD_META = "deck_view_card"
 const CARD_REMOVING_META = "card_removing"
@@ -27,7 +28,6 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	var deck_ref = $"../PlayerSide/PlayerDecks/Deck"
 	if hovered_card and not is_instance_valid(hovered_card):
 		hovered_card = null
 		card_is_hovered = false
@@ -68,22 +68,30 @@ func start_drag(card):
 	card_drag.set_visuals_visible(true)
 	hide_hover_preview()
 	_set_card_collision_disabled(card_drag, true)
-	card_drag.z_index = 3
+	card_drag.z_index = DRAG_Z_INDEX
 
 
 func finish_drag():
+	var dragged_card = card_drag
+	if dragged_card == null:
+		return
+
 	var target_found = raycast_check_for_target()
 	if target_found and battle_manager_ref and battle_manager_ref.has_method("try_play_card"):
-		if battle_manager_ref.try_play_card(card_drag, target_found):
+		dragged_card.visible = false
+		card_drag = null
+		if await battle_manager_ref.try_play_card(dragged_card, target_found):
 			card_drag = null
 			return
+		dragged_card.visible = true
+		card_drag = dragged_card
 
 	set_hovered_card(null)
-	card_drag.set_visuals_visible(true)
+	dragged_card.set_visuals_visible(true)
 	hide_hover_preview()
-	_set_card_collision_disabled(card_drag, false)
-	card_drag.z_index = 1
-	player_hand_ref.add_card_to_hand(card_drag, RETURN_TO_HAND_SPEED)
+	_set_card_collision_disabled(dragged_card, false)
+	dragged_card.z_index = 1
+	player_hand_ref.add_card_to_hand(dragged_card, RETURN_TO_HAND_SPEED)
 	card_drag = null
 
 
@@ -105,7 +113,7 @@ func connect_card_signals(card):
 
 func on_left_click_release():
 	if card_drag:
-		finish_drag()
+		await finish_drag()
 
 
 func on_hover_card(card):

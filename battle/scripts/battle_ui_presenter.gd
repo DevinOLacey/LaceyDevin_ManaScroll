@@ -1,8 +1,8 @@
 extends RefCounted
 
 const CARD_SCENE = preload("res://cards/scenes/card.tscn")
+const BattleEnemySceneResolverResource = preload("res://battle/scripts/battle_enemy_scene_resolver.gd")
 const PLAYER_SCENE = preload("res://scenes/player.tscn")
-const ENEMY_SCENE = preload("res://scenes/enemy.tscn")
 
 
 static func update_hud(refs: Dictionary, state: Dictionary) -> void:
@@ -277,7 +277,7 @@ static func _build_actor_preview(actor_key: String, current_enemy_id: String, cu
 	var holder := Control.new()
 	holder.custom_minimum_size = Vector2(170, 220)
 
-	var actor_scene: PackedScene = PLAYER_SCENE if actor_key == "player" else ENEMY_SCENE
+	var actor_scene: PackedScene = PLAYER_SCENE if actor_key == "player" else BattleEnemySceneResolverResource.get_enemy_scene(current_enemy_data)
 	var actor_instance: Node2D = actor_scene.instantiate()
 	actor_instance.position = Vector2(85, 118)
 	if actor_key == "player":

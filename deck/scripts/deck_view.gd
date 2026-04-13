@@ -9,6 +9,7 @@ var draw_weights := {}
 var backdrop_ref: ColorRect
 var hover_preview
 var hovered_card_slot
+var card_data_provider: Callable
 
 
 func _ready() -> void:
@@ -26,6 +27,10 @@ func configure(definitions: Dictionary, weights: Dictionary, backdrop: ColorRect
 	card_definitions = definitions.duplicate(true)
 	draw_weights = weights.duplicate()
 	backdrop_ref = backdrop
+
+
+func set_card_data_provider(provider: Callable) -> void:
+	card_data_provider = provider
 
 
 func connect_card_signals(card) -> void:
@@ -96,23 +101,30 @@ func _populate_card_slot(card_slot: Node2D, card_name: String) -> void:
 		card_slot.visible = false
 		return
 
+	if card_data_provider.is_valid():
+		var provided_card_data = card_data_provider.call(card_name, card_definition.duplicate(true))
+		if provided_card_data is Dictionary and not provided_card_data.is_empty():
+			card_definition = provided_card_data
+
 	if card_slot.has_method("apply_card_data"):
 		card_slot.apply_card_data(card_name, card_definition)
 	_apply_draw_chance_label(card_slot, card_name)
 
 
 func _apply_draw_chance_label(card_slot: Node2D, card_name: String) -> void:
-	var weight: float = float(draw_weights.get(card_name, 0.0))
-	var total_weight: float = 0.0
-	for weight_value in draw_weights.values():
-		total_weight += float(weight_value)
+	var draw_chance_text := "[b][i]Path card[/i][/b]"
+	if draw_weights.has(card_name):
+		var weight: float = float(draw_weights.get(card_name, 0.0))
+		var total_weight: float = 0.0
+		for weight_value in draw_weights.values():
+			total_weight += float(weight_value)
 
-	var chance_percent: float = 0.0
-	if total_weight > 0.0:
-		chance_percent = (weight / total_weight) * 100.0
+		var chance_percent: float = 0.0
+		if total_weight > 0.0:
+			chance_percent = (weight / total_weight) * 100.0
+		draw_chance_text = "[b][i]Draw chance: %.0f%%[/i][/b]" % chance_percent
 
 	var draw_chance_label: RichTextLabel = card_slot.get_node_or_null("DrawChance")
-	var draw_chance_text := "[b][i]Draw chance: %.0f%%[/i][/b]" % chance_percent
 	if draw_chance_label:
 		draw_chance_label.set_meta("bbcode_source", draw_chance_text)
 		draw_chance_label.bbcode_enabled = true

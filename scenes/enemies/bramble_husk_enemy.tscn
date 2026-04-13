@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://43yhba8bcca0"]
+
+[ext_resource type="Script" uid="uid://dd0f4mk4d76ce" path="res://battle/scripts/enemy_actor.gd" id="1_enemy_script"]
+[ext_resource type="Texture2D" uid="uid://c0nybnqy3u5a2" path="res://battle/art/actors/bramble_husk.png" id="2_enemy_art"]
+
+[sub_resource type="RectangleShape2D" id="1_hitbox"]
+size = Vector2(174, 234)
+
+[node name="Enemy" type="Node2D" unique_id=1132013170]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_enemy_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1747525427]
+position = Vector2(6, -26)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("2_enemy_art")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1858281056]
+position = Vector2(4, -32)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=730219372]
+position = Vector2(1, 19)
+shape = SubResource("1_hitbox")

@@ -93,6 +93,7 @@ func update_hand_position(speed, manifested_card = null):
 		var card = player_hand[i]
 		card.hand_position = new_position
 		if card == manifested_card and card.has_method("manifest_to_position"):
+			card.visible = true
 			card.manifest_to_position(new_position, MANIFEST_DRAW_SPEED)
 		else:
 			animate_card_to_position(card, new_position, speed)
@@ -181,6 +182,7 @@ func _manifest_added_cards_staggered(cards: Array[Node2D]) -> void:
 		if not is_instance_valid(card):
 			continue
 
+		card.visible = true
 		if card.has_method("manifest_to_position"):
 			card.manifest_to_position(card.hand_position, MANIFEST_DRAW_SPEED)
 		else:

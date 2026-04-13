@@ -91,7 +91,7 @@ static func _build_combined_card_data(selected_cards: Array, primary_card: Node2
 	return combined_data
 
 
-static func _build_fused_description(card_id: String, card_data: Dictionary) -> String:
+static func _build_fused_description(_card_id: String, card_data: Dictionary) -> String:
 	var description := str(card_data.get("description", ""))
 	var replacement_value := 0
 	if int(card_data.get("damage", 0)) > 0:

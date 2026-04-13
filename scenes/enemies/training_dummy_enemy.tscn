@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://battle/scripts/enemy_actor.gd" id="1_enemy_script"]
+[ext_resource type="Texture2D" path="res://battle/art/actors/training_dummy.png" id="2_enemy_art"]
+
+[sub_resource type="RectangleShape2D" id="1_hitbox"]
+size = Vector2(115, 134)
+
+[node name="Enemy" type="Node2D"]
+script = ExtResource("1_enemy_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(1.5, 1.5)
+scale = Vector2(0.734615, 0.675)
+texture = ExtResource("2_enemy_art")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(2.5, -4)
+shape = SubResource("1_hitbox")

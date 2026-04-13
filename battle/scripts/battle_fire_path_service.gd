@@ -1,5 +1,7 @@
 extends RefCounted
 
+const CardArtDatabaseResource = preload("res://cards/data/card_art_database.gd")
+
 const FLAME_THRESHOLD := 3
 const EMBER_THRESHOLD := 5
 const BURN_DURATION := 3
@@ -115,7 +117,7 @@ static func _build_flame_bolt_data(base_card_data: Dictionary) -> Dictionary:
 	card_data["damage"] = 5
 	card_data["description"] = "Loose a blazing bolt dealing [i][b]5[/b] damage[/i] and inflicting [i][b]1 Burn[/b][/i]"
 	card_data["fusion_match_id"] = "flame_bolt"
-	return card_data
+	return CardArtDatabaseResource.apply_variant_art(card_data, "flame_bolt")
 
 
 static func _build_ember_shield_data(base_card_data: Dictionary) -> Dictionary:
@@ -125,7 +127,7 @@ static func _build_ember_shield_data(base_card_data: Dictionary) -> Dictionary:
 	card_data["block"] = int(base_card_data.get("block", 0)) + 1
 	card_data["description"] = "Wrap yourself in embers [i]blocking [b]3[/b][/i] and gain Ember Guard while you still have block"
 	card_data["fusion_match_id"] = "ember_shield"
-	return card_data
+	return CardArtDatabaseResource.apply_variant_art(card_data, "ember_shield")
 
 
 static func append_path_gain_text(card_id: String, card_data: Dictionary) -> Dictionary:

@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://deck/scenes/deck.tscn" id="5_tbgi4"]
 [ext_resource type="Texture2D" uid="uid://bv5sodykfjwqi" path="res://cards/art/end_turn.png" id="6_tefeu"]
 [ext_resource type="PackedScene" uid="uid://c5c2toepivbq1" path="res://battle/scenes/battle_controller.tscn" id="7_o6xl0"]
-[ext_resource type="PackedScene" uid="uid://dvkror0e1sr7j" path="res://scenes/enemy.tscn" id="7_tipki"]
 [ext_resource type="PackedScene" uid="uid://1ey835hx28mh" path="res://scenes/player.tscn" id="8_85g3d"]
 [ext_resource type="PackedScene" uid="uid://ctra3cf6tx17g" path="res://battle/scenes/player_mana_display.tscn" id="9_85g3d"]
 [ext_resource type="PackedScene" path="res://battle/scenes/turn_panel.tscn" id="10_turn"]
@@ -17,15 +16,23 @@
 [ext_resource type="PackedScene" uid="uid://bwl0kadd6cjxx" path="res://battle/scenes/combat_log_overlay.tscn" id="15_log"]
 [ext_resource type="PackedScene" path="res://battle/scenes/defeat_transition_layer.tscn" id="16_defeat"]
 [ext_resource type="PackedScene" path="res://battle/scenes/battle_level_up_overlay.tscn" id="17_level_up"]
+[ext_resource type="Texture2D" uid="uid://bqf3lcadtdwki" path="res://ui/art/backgrounds/background.png" id="18_combat_bg"]
+[ext_resource type="PackedScene" path="res://battle/scenes/battle_spell_preview_overlay.tscn" id="19_spell_preview"]
 
 [node name="main" type="Node2D" unique_id=2029937529]
+
+[node name="CombatBackground" type="Sprite2D" parent="." unique_id=130123630]
+z_index = -100
+position = Vector2(960, 540)
+scale = Vector2(1.25, 1.0546875)
+texture = ExtResource("18_combat_bg")
 
 [node name="PlayerSide" type="Node2D" parent="." unique_id=1479227912]
 
 [node name="PlayerSprites" type="Node2D" parent="PlayerSide" unique_id=1830437564]
 
 [node name="Player" parent="PlayerSide/PlayerSprites" unique_id=2089395328 instance=ExtResource("8_85g3d")]
-position = Vector2(326, 503)
+position = Vector2(298, 491)
 scale = Vector2(2, 2)
 
 [node name="PlayerStats" type="Node" parent="PlayerSide" unique_id=965401508]
@@ -40,10 +47,6 @@ position = Vector2(150, 890)
 [node name="Enemies" type="Node2D" parent="." unique_id=1136148551]
 
 [node name="EnemySprites" type="Node2D" parent="Enemies" unique_id=444786205]
-
-[node name="Enemy" parent="Enemies/EnemySprites" unique_id=1993765232 instance=ExtResource("7_tipki")]
-position = Vector2(1582, 534)
-scale = Vector2(2, 2)
 
 [node name="EnemyStats" type="Node" parent="Enemies" unique_id=1828906521]
 
@@ -61,24 +64,24 @@ offset_bottom = 895.0
 scale = Vector2(0.8307479, 0.85598963)
 
 [node name="PlayerVitalsPanel" parent="." unique_id=944667198 instance=ExtResource("11_player_hud")]
-offset_left = 74.00001
-offset_top = 103.0
-offset_right = 670.0
-offset_bottom = 300.0
+offset_left = 15.0
+offset_top = 107.00001
+offset_right = 611.0
+offset_bottom = 304.0
 scale = Vector2(0.89363647, 0.8794833)
 
 [node name="OpponentVitalsPanel" parent="." unique_id=948644375 instance=ExtResource("12_enemy_hud")]
-offset_left = 1290.0
-offset_top = 105.0
-offset_right = 1886.0
-offset_bottom = 302.0
+offset_left = 1391.0
+offset_top = 98.0
+offset_right = 1987.0
+offset_bottom = 295.0
 scale = Vector2(0.86521953, 0.84161454)
 
 [node name="BattleLogLabel" type="Label" parent="." unique_id=898616620]
-offset_left = 616.0
+offset_left = 767.0
 offset_top = 111.0
-offset_right = 1267.0
-offset_bottom = 175.0
+offset_right = 1241.0
+offset_bottom = 249.0
 theme_override_font_sizes/font_size = 18
 text = "Drag a spell onto a valid target to cast it."
 horizontal_alignment = 1
@@ -103,7 +106,7 @@ one_shot = true
 position = Vector2(211, 697)
 
 [node name="EnemyMana" parent="." unique_id=1515613784 instance=ExtResource("13_trceg")]
-position = Vector2(1854, 325)
+position = Vector2(1803, 692)
 
 [node name="BattleHUDLayer" parent="." unique_id=785279492 instance=ExtResource("14_hud")]
 
@@ -112,5 +115,7 @@ position = Vector2(1854, 325)
 [node name="DefeatTransitionLayer" parent="." unique_id=1588221001 instance=ExtResource("16_defeat")]
 
 [node name="BattleLevelUpOverlay" parent="." unique_id=2089627934 instance=ExtResource("17_level_up")]
+
+[node name="BattleSpellPreviewOverlay" parent="." unique_id=1813485268 instance=ExtResource("19_spell_preview")]
 
 [connection signal="pressed" from="EndTurnButton" to="BattleManager" method="_on_end_turn_button_pressed"]

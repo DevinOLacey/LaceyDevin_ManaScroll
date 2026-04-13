@@ -9,6 +9,10 @@ const PATH_OF_FLAME := "path_of_flame"
 const PATH_OF_ENERGY := "path_of_energy"
 const PATH_OF_FROST := "path_of_frost"
 
+const FLAME_DECK_VIEW_CARD_IDS := ["flame_bolt", "ember_shield"]
+const ENERGY_DECK_VIEW_CARD_IDS := ["accelerate_mana_gates", "unstable_discharge"]
+const FROST_DECK_VIEW_CARD_IDS := ["ice_bolt", "frost_armor"]
+
 
 static func create_runtime_state() -> Dictionary:
 	return {
@@ -217,6 +221,17 @@ static func get_class_mechanics_text(runtime_state: Dictionary) -> String:
 	return "\n\n".join(mechanic_sections)
 
 
+static func get_deck_view_card_ids(runtime_state: Dictionary, base_card_ids: Array[String]) -> Array[String]:
+	var deck_view_card_ids: Array[String] = base_card_ids.duplicate()
+	if has_path(runtime_state, PATH_OF_FLAME):
+		_append_unique_card_ids(deck_view_card_ids, FLAME_DECK_VIEW_CARD_IDS)
+	if has_path(runtime_state, PATH_OF_ENERGY):
+		_append_unique_card_ids(deck_view_card_ids, ENERGY_DECK_VIEW_CARD_IDS)
+	if has_path(runtime_state, PATH_OF_FROST):
+		_append_unique_card_ids(deck_view_card_ids, FROST_DECK_VIEW_CARD_IDS)
+	return deck_view_card_ids
+
+
 static func apply_enemy_burn(current_stacks: int, current_turns_remaining: int, amount: int) -> Dictionary:
 	return BattleFirePathService.apply_burn(current_stacks, current_turns_remaining, amount)
 
@@ -297,3 +312,10 @@ static func _build_default_fire_state() -> Dictionary:
 		"ember_shield_primed": false,
 		"ember_guard_active": false,
 	}
+
+
+static func _append_unique_card_ids(target_card_ids: Array, additional_card_ids: Array) -> void:
+	for card_id in additional_card_ids:
+		var normalized_card_id := str(card_id)
+		if not target_card_ids.has(normalized_card_id):
+			target_card_ids.append(normalized_card_id)

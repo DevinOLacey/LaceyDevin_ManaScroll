@@ -1,5 +1,7 @@
 extends RefCounted
 
+const CardArtDatabaseResource = preload("res://cards/data/card_art_database.gd")
+
 const FROST_THRESHOLD := 2
 const CHILL_THRESHOLD := 3
 
@@ -130,7 +132,7 @@ static func _build_ice_bolt_data(base_card_data: Dictionary) -> Dictionary:
 	card_data["effect"] = "ice_bolt"
 	card_data["description"] = "Hurl a razor shard of frost that [i][b]shatters block[/b][/i] and then deals [i][b]6[/b] damage[/i]"
 	card_data["fusion_match_id"] = "ice_bolt"
-	return card_data
+	return CardArtDatabaseResource.apply_variant_art(card_data, "ice_bolt")
 
 
 static func _build_frost_armor_data(base_card_data: Dictionary) -> Dictionary:
@@ -141,4 +143,4 @@ static func _build_frost_armor_data(base_card_data: Dictionary) -> Dictionary:
 	card_data["effect"] = "frost_armor"
 	card_data["description"] = "Wrap yourself in frozen wards and gain [i][b]1 Frost Armor[/b][/i]. Each charge reflects the next attack"
 	card_data["fusion_match_id"] = "frost_armor"
-	return card_data
+	return CardArtDatabaseResource.apply_variant_art(card_data, "frost_armor")

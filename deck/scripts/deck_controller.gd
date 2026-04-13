@@ -16,6 +16,8 @@ var deck_view_ref: Node2D
 var deck_view_backdrop_ref: ColorRect
 var deck_view_layer_ref: CanvasLayer
 var card_draw_modifier: Callable
+var deck_view_card_ids_provider: Callable
+var deck_view_card_data_provider: Callable
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -118,6 +120,14 @@ func set_card_draw_modifier(modifier: Callable) -> void:
 	card_draw_modifier = modifier
 
 
+func set_deck_view_card_ids_provider(provider: Callable) -> void:
+	deck_view_card_ids_provider = provider
+
+
+func set_deck_view_card_data_provider(provider: Callable) -> void:
+	deck_view_card_data_provider = provider
+
+
 func _draw_card_instance() -> Node2D:
 	var card_drawn: String = _roll_weighted_card()
 	if card_drawn.is_empty():
@@ -137,6 +147,10 @@ func _draw_card_instance() -> Node2D:
 	var new_card: Node2D = CARD_SCENE.instantiate()
 	$"../../../CardManager".add_child(new_card)
 	new_card.name = card_drawn
+	new_card.visible = false
+	var collision: CollisionShape2D = new_card.get_node_or_null("Area2D/CollisionShape2D")
+	if collision:
+		collision.disabled = true
 	if new_card.has_method("apply_card_data"):
 		new_card.apply_card_data(card_drawn, card_definition)
 	return new_card
@@ -157,6 +171,8 @@ func _create_deck_view() -> void:
 	deck_view_ref.visible = false
 	if deck_view_ref.has_method("configure"):
 		deck_view_ref.configure(card_definitions, card_draw_weights, deck_view_backdrop_ref)
+	if deck_view_ref and deck_view_ref.has_method("set_card_data_provider"):
+		deck_view_ref.set_card_data_provider(Callable(self, "_get_deck_view_card_data"))
 	get_parent().call_deferred("add_child", deck_view_layer_ref)
 	deck_view_layer_ref.call_deferred("add_child", deck_view_backdrop_ref)
 	deck_view_layer_ref.call_deferred("add_child", deck_view_ref)
@@ -167,6 +183,12 @@ func _show_deck_view() -> void:
 		return
 
 	var unique_cards: Array[String] = _get_weighted_card_ids()
+	if deck_view_card_ids_provider.is_valid():
+		var provided_card_ids = deck_view_card_ids_provider.call(unique_cards.duplicate())
+		if provided_card_ids is Array:
+			unique_cards = []
+			for card_id in provided_card_ids:
+				unique_cards.append(str(card_id))
 	if deck_view_ref.has_method("show_cards"):
 		deck_view_ref.show_cards(unique_cards)
 
@@ -202,3 +224,11 @@ func _get_player_hand_ref() -> Node:
 	if player_hand_ref == null or not is_instance_valid(player_hand_ref):
 		player_hand_ref = get_node_or_null("../PlayerHand")
 	return player_hand_ref
+
+
+func _get_deck_view_card_data(card_id: String, base_card_data: Dictionary) -> Dictionary:
+	if deck_view_card_data_provider.is_valid():
+		var provided_card_data = deck_view_card_data_provider.call(card_id, base_card_data.duplicate(true))
+		if provided_card_data is Dictionary and not provided_card_data.is_empty():
+			return provided_card_data
+	return base_card_data.duplicate(true)

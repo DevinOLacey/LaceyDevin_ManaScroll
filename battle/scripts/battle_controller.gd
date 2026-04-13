@@ -3,6 +3,7 @@ extends Node2D
 const CombatCardDatabase = preload("res://cards/data/card_database.gd")
 const BattleCombatResolver = preload("res://battle/scripts/battle_combat_resolver.gd")
 const BattleEnemyAI = preload("res://battle/scripts/battle_enemy_ai.gd")
+const BattleEnemySceneResolverResource = preload("res://battle/scripts/battle_enemy_scene_resolver.gd")
 const BattleFusionService = preload("res://battle/scripts/battle_fusion_service.gd")
 const BattleLevelUpService = preload("res://battle/scripts/battle_level_up_service.gd")
 const BattlePathEffectsService = preload("res://battle/scripts/battle_path_effects_service.gd")
@@ -10,7 +11,6 @@ const BattleTargeting = preload("res://battle/scripts/battle_targeting.gd")
 const BattleUIPresenter = preload("res://battle/scripts/battle_ui_presenter.gd")
 const EnemyDatabaseResource = preload("res://battle/data/enemy_database.gd")
 const SELECT_FROM_HAND_SCENE = preload("res://cards/scenes/select_from_hand.tscn")
-const ENEMY_SCENE = preload("res://scenes/enemy.tscn")
 const DEFEAT_SCENE_PATH := "res://ui/scenes/defeat_menu.tscn"
 
 const STARTING_HEALTH := 20
@@ -56,6 +56,7 @@ var combat_log_scroll_container: ScrollContainer
 var defeat_transition_layer: CanvasLayer
 var defeat_transition_rect: ColorRect
 var level_up_overlay: CanvasLayer
+var spell_preview_overlay: CanvasLayer
 var combat_log_entries: Array[Dictionary] = []
 var pending_level_up_options: Array[Dictionary] = []
 var chosen_upgrade_paths: Array[String] = []
@@ -130,10 +131,15 @@ func _ready() -> void:
 	defeat_transition_layer = get_node_or_null("../DefeatTransitionLayer")
 	defeat_transition_rect = get_node_or_null("../DefeatTransitionLayer/DefeatFade")
 	level_up_overlay = get_node_or_null("../BattleLevelUpOverlay")
+	spell_preview_overlay = get_node_or_null("../BattleSpellPreviewOverlay")
 	player_target = $"../PlayerSide/PlayerSprites/Player"
 	_wire_ui_signals()
 	if deck_ref and deck_ref.has_method("set_card_draw_modifier"):
 		deck_ref.set_card_draw_modifier(Callable(self, "_modify_drawn_player_card"))
+	if deck_ref and deck_ref.has_method("set_deck_view_card_ids_provider"):
+		deck_ref.set_deck_view_card_ids_provider(Callable(self, "_get_deck_view_card_ids"))
+	if deck_ref and deck_ref.has_method("set_deck_view_card_data_provider"):
+		deck_ref.set_deck_view_card_data_provider(Callable(self, "_get_deck_view_card_data"))
 	_spawn_enemy_for_stage(current_stage_number)
 	_begin_player_turn(true)
 
@@ -199,7 +205,7 @@ func try_play_card(card: Node2D, target: Node2D = null) -> bool:
 		"enchantment":
 			return _play_player_enchantment(card, card_data, mana_cost)
 		"spell":
-			return _play_player_spell(card, card_data, mana_cost, target)
+			return await _play_player_spell(card, card_data, mana_cost, target)
 		_:
 			_log_message("That card type is not playable yet.")
 			_update_hud()
@@ -247,6 +253,8 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 
 	player_current_mana -= total_cost
 	player_remaining_spell_actions = maxi(0, player_remaining_spell_actions - 1)
+	_discard_player_card(card)
+	await _show_spell_preview(card_id, resolved_card_data, "player")
 	var resolution := _resolve_spell_effect(resolved_card_data, "player", target, effect_multiplier)
 
 	var extra_messages: Array[String] = []
@@ -265,9 +273,7 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 		if not burn_message.is_empty():
 			extra_messages.append(burn_message)
 	if bool(path_resolution.get("refresh_hand_cards", false)):
-		_refresh_player_hand_path_cards(card)
-
-	_discard_player_card(card)
+		_refresh_player_hand_path_cards()
 
 	_log_message(_compose_battle_message(str(resolution.get("log_message", "")), extra_messages))
 
@@ -366,6 +372,7 @@ func _run_opponent_turn() -> void:
 		opponent_mana_progress = maxf(0.0, opponent_mana_progress - float(mana_cost))
 		_sync_opponent_mana()
 		opponent_remaining_spell_actions = maxi(0, opponent_remaining_spell_actions - 1)
+		await _show_spell_preview(opponent_card, card_data, "opponent")
 		var resolution := _resolve_spell_effect(card_data, "opponent", BattleTargeting.get_default_target_for_opponent(card_data, player_target, enemy_target))
 		var extra_messages: Array[String] = []
 		var ember_burn_to_attacker := int(resolution.get("ember_burn_to_attacker", 0))
@@ -434,7 +441,7 @@ func _choose_opponent_card() -> String:
 	)
 
 
-func _discard_player_card(card: Node2D) -> void:
+func _discard_player_card(card) -> void:
 	if card == null or not is_instance_valid(card):
 		return
 	var card_manager_ref := get_node_or_null("../CardManager")
@@ -662,6 +669,12 @@ func _scroll_combat_log_to_top() -> void:
 		combat_log_scroll_container.scroll_vertical = 0
 
 
+func _show_spell_preview(card_id: String, card_data: Dictionary, caster: String) -> void:
+	if spell_preview_overlay == null or not spell_preview_overlay.has_method("show_spell_preview"):
+		return
+	await spell_preview_overlay.show_spell_preview(card_id, card_data, caster)
+
+
 func _wire_ui_signals() -> void:
 	var combat_log_button := get_node_or_null("../BattleHUDLayer/HUDBar/HUDMargin/HUDRow/CombatLogButton") as Button
 	if combat_log_button and not combat_log_button.pressed.is_connected(_on_combat_log_button_pressed):
@@ -741,9 +754,10 @@ func _spawn_enemy_for_stage(stage_number: int) -> void:
 	for child in enemy_sprites_ref.get_children():
 		child.queue_free()
 
-	enemy_target = ENEMY_SCENE.instantiate()
+	var enemy_scene := BattleEnemySceneResolverResource.get_enemy_scene(current_enemy_data)
+	enemy_target = enemy_scene.instantiate()
 	enemy_sprites_ref.add_child(enemy_target)
-	enemy_target.position = Vector2(1547, 437)
+	enemy_target.position = Vector2(1547, 525)
 	if enemy_target.has_method("apply_enemy_data"):
 		enemy_target.apply_enemy_data(current_enemy_id, current_enemy_data)
 
@@ -811,6 +825,14 @@ func _has_path(path_id: String) -> bool:
 
 func _modify_drawn_player_card(card_id: String, base_card_data: Dictionary) -> Dictionary:
 	return BattlePathEffectsService.modify_drawn_card(player_path_runtime, card_id, base_card_data)
+
+
+func _get_deck_view_card_ids(base_card_ids: Array[String]) -> Array[String]:
+	return BattlePathEffectsService.get_deck_view_card_ids(player_path_runtime, base_card_ids)
+
+
+func _get_deck_view_card_data(card_id: String, base_card_data: Dictionary) -> Dictionary:
+	return BattlePathEffectsService.decorate_card_data(player_path_runtime, card_id, base_card_data)
 
 
 func _apply_path_text_to_card(card: Node2D) -> void:
