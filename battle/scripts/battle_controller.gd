@@ -166,6 +166,14 @@ func can_player_interact() -> bool:
 	return active_side == "player" and not resolving_turn and selection_scene_ref == null and not _is_level_up_overlay_visible()
 
 
+func set_player_drag_card(card: Node2D = null) -> void:
+	var dragging_spell := false
+	if card != null and is_instance_valid(card):
+		var card_data: Dictionary = card.get_meta("card_data", {})
+		dragging_spell = str(card_data.get("category", "")).to_lower() == "spell"
+	_set_player_spell_drag_active(dragging_spell)
+
+
 func is_selection_active() -> bool:
 	return selection_scene_ref != null
 
@@ -254,6 +262,7 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 	player_current_mana -= total_cost
 	player_remaining_spell_actions = maxi(0, player_remaining_spell_actions - 1)
 	_discard_player_card(card)
+	_play_player_cast_animation(card_id, resolved_card_data)
 	await _show_spell_preview(card_id, resolved_card_data, "player")
 	var resolution := _resolve_spell_effect(resolved_card_data, "player", target, effect_multiplier)
 
@@ -328,6 +337,25 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 	return resolution
 
 
+func _set_player_spell_drag_active(active: bool) -> void:
+	if player_target and player_target.has_method("set_spell_drag_active"):
+		player_target.set_spell_drag_active(active)
+
+
+func _play_player_cast_animation(card_id: String, card_data: Dictionary) -> void:
+	if player_target and player_target.has_method("play_cast_animation"):
+		player_target.play_cast_animation(card_id, card_data)
+
+
+func _play_enemy_action_pose(card_data: Dictionary) -> void:
+	if enemy_target == null:
+		return
+	if int(card_data.get("damage", 0)) > 0 and enemy_target.has_method("play_attack_pose"):
+		enemy_target.play_attack_pose()
+	elif int(card_data.get("block", 0)) > 0 and enemy_target.has_method("play_defend_pose"):
+		enemy_target.play_defend_pose()
+
+
 func _end_player_turn(reason: String) -> void:
 	if resolving_turn:
 		return
@@ -372,6 +400,7 @@ func _run_opponent_turn() -> void:
 		opponent_mana_progress = maxf(0.0, opponent_mana_progress - float(mana_cost))
 		_sync_opponent_mana()
 		opponent_remaining_spell_actions = maxi(0, opponent_remaining_spell_actions - 1)
+		_play_enemy_action_pose(card_data)
 		await _show_spell_preview(opponent_card, card_data, "opponent")
 		var resolution := _resolve_spell_effect(card_data, "opponent", BattleTargeting.get_default_target_for_opponent(card_data, player_target, enemy_target))
 		var extra_messages: Array[String] = []

@@ -69,12 +69,14 @@ func start_drag(card):
 	hide_hover_preview()
 	_set_card_collision_disabled(card_drag, true)
 	card_drag.z_index = DRAG_Z_INDEX
+	_set_player_drag_state(card_drag)
 
 
 func finish_drag():
 	var dragged_card = card_drag
 	if dragged_card == null:
 		return
+	_set_player_drag_state(null)
 
 	var target_found = raycast_check_for_target()
 	if target_found and battle_manager_ref and battle_manager_ref.has_method("try_play_card"):
@@ -194,6 +196,7 @@ func clear_card_hover(card = null) -> void:
 	if card_drag == card:
 		hide_hover_preview()
 		card_drag = null
+		_set_player_drag_state(null)
 	elif card == null:
 		hide_hover_preview()
 
@@ -214,6 +217,11 @@ func _prepare_card_for_removal(card: Node2D) -> void:
 	_set_card_collision_disabled(card, true)
 	if card.has_method("set_visuals_visible"):
 		card.set_visuals_visible(true)
+
+
+func _set_player_drag_state(card: Node2D = null) -> void:
+	if battle_manager_ref and battle_manager_ref.has_method("set_player_drag_card"):
+		battle_manager_ref.set_player_drag_card(card)
 
 
 func raycast_check_for_target():

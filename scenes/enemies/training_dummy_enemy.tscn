@@ -1,23 +1,49 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cq78p5efaro8p"]
 
-[ext_resource type="Script" path="res://battle/scripts/enemy_actor.gd" id="1_enemy_script"]
-[ext_resource type="Texture2D" path="res://battle/art/actors/training_dummy.png" id="2_enemy_art"]
+[ext_resource type="Script" uid="uid://dd0f4mk4d76ce" path="res://battle/scripts/enemy_actor.gd" id="1_enemy_script"]
+[ext_resource type="Texture2D" uid="uid://bavf5biefupk2" path="res://battle/art/actors/Training dummy sprite sheet.png" id="2_1uxuk"]
 
 [sub_resource type="RectangleShape2D" id="1_hitbox"]
-size = Vector2(115, 134)
+size = Vector2(90, 135)
 
-[node name="Enemy" type="Node2D"]
+[node name="Enemy" type="Node2D" unique_id=620834058]
 script = ExtResource("1_enemy_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(1.5, 1.5)
-scale = Vector2(0.734615, 0.675)
-texture = ExtResource("2_enemy_art")
+[node name="default" type="Sprite2D" parent="." unique_id=1625765453]
+position = Vector2(1.5, -32.5)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("2_1uxuk")
+region_enabled = true
+region_rect = Rect2(314.9898, 46.458755, 309.0932, 458.87195)
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="attacking" type="Sprite2D" parent="." unique_id=1290802206]
+visible = false
+position = Vector2(-16, -29)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("2_1uxuk")
+region_enabled = true
+region_rect = Rect2(709.934, 57.99974, 453.26373, 444.62842)
+
+[node name="defending" type="Sprite2D" parent="." unique_id=802258749]
+visible = false
+position = Vector2(-3.6750016, -16.849998)
+scale = Vector2(0.3017615, 0.32251462)
+texture = ExtResource("2_1uxuk")
+region_enabled = true
+region_rect = Rect2(358.20016, 617.2816, 369.42166, 342.1488)
+
+[node name="death" type="Sprite2D" parent="." unique_id=1679126723]
+visible = false
+position = Vector2(10.624996, -7.224998)
+scale = Vector2(0.2811828, 0.28946587)
+texture = ExtResource("2_1uxuk")
+region_enabled = true
+region_rect = Rect2(804.45844, 637.1368, 465.0639, 337.3404)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=751470775]
 collision_layer = 8
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(2.5, -4)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1702224602]
+position = Vector2(3, -32.5)
 shape = SubResource("1_hitbox")
