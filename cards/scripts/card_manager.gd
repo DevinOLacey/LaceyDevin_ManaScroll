@@ -1,14 +1,8 @@
 extends Node2D
 
-const COLLISON_MASK = 1
-const COLLISON_MASK_TARGET = 8
-const DEFAULT_DRAW_SPEED = 0.1
-const RETURN_TO_HAND_SPEED = 0.1
-const CARD_BOTTOM_OFFSET = 144.0
-const DRAG_Z_INDEX = 20
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
+const CardConstants = preload("res://shared/constants/card_constants.gd")
 const HOVER_PREVIEW_SCENE = preload("res://cards/scenes/card_2_scale.tscn")
-const DECK_VIEW_CARD_META = "deck_view_card"
-const CARD_REMOVING_META = "card_removing"
 
 var card_drag
 var screen_size
@@ -68,7 +62,7 @@ func start_drag(card):
 	card_drag.set_visuals_visible(true)
 	hide_hover_preview()
 	_set_card_collision_disabled(card_drag, true)
-	card_drag.z_index = DRAG_Z_INDEX
+	card_drag.z_index = CardConstants.DRAG_Z_INDEX
 	_set_player_drag_state(card_drag)
 
 
@@ -93,7 +87,7 @@ func finish_drag():
 	hide_hover_preview()
 	_set_card_collision_disabled(dragged_card, false)
 	dragged_card.z_index = 1
-	player_hand_ref.add_card_to_hand(dragged_card, RETURN_TO_HAND_SPEED)
+	player_hand_ref.add_card_to_hand(dragged_card, CardConstants.RETURN_TO_HAND_SPEED)
 	card_drag = null
 
 
@@ -121,7 +115,7 @@ func on_left_click_release():
 func on_hover_card(card):
 	if card_drag:
 		return
-	if card and card.has_meta(CARD_REMOVING_META) and card.get_meta(CARD_REMOVING_META):
+	if card and card.has_meta(CardConstants.CARD_REMOVING_META) and card.get_meta(CardConstants.CARD_REMOVING_META):
 		return
 	if battle_manager_ref and battle_manager_ref.has_method("is_selection_active") and battle_manager_ref.is_selection_active():
 		return
@@ -171,7 +165,7 @@ func show_hover_preview(card, base_position: Vector2):
 	hover_preview.registers_hover_signals = false
 	card.get_parent().add_child(hover_preview)
 	hover_preview.copy_display_from(card)
-	hover_preview.position = base_position - Vector2(0, CARD_BOTTOM_OFFSET)
+	hover_preview.position = base_position - Vector2(0, CardConstants.CARD_BOTTOM_OFFSET)
 	hover_preview.z_index = card.z_index + 10
 
 	var preview_area = hover_preview.get_node_or_null("Area2D")
@@ -213,7 +207,7 @@ func _set_card_collision_disabled(card: Node2D, disabled: bool) -> void:
 func _prepare_card_for_removal(card: Node2D) -> void:
 	if card == null:
 		return
-	card.set_meta(CARD_REMOVING_META, true)
+	card.set_meta(CardConstants.CARD_REMOVING_META, true)
 	_set_card_collision_disabled(card, true)
 	if card.has_method("set_visuals_visible"):
 		card.set_visuals_visible(true)
@@ -229,7 +223,7 @@ func raycast_check_for_target():
 	var parameters = PhysicsPointQueryParameters2D.new()
 	parameters.position = get_global_mouse_position()
 	parameters.collide_with_areas = true
-	parameters.collision_mask = COLLISON_MASK_TARGET
+	parameters.collision_mask = CardConstants.MANAGER_COLLISION_MASK_TARGET
 	var result = space_state.intersect_point(parameters)
 	if result.size() > 0:
 		return result[0].collider.get_parent()
@@ -241,7 +235,7 @@ func raycast_check_for_card():
 	var parameters = PhysicsPointQueryParameters2D.new()
 	parameters.position = get_global_mouse_position()
 	parameters.collide_with_areas = true
-	parameters.collision_mask = COLLISON_MASK
+	parameters.collision_mask = CardConstants.MANAGER_COLLISION_MASK
 	var result = space_state.intersect_point(parameters)
 	if result.size() > 0:
 		var deck_ref = $"../PlayerSide/PlayerDecks/Deck"
@@ -249,9 +243,9 @@ func raycast_check_for_card():
 		var filtered_cards: Array = []
 		for hit in result:
 			var card = hit.collider.get_parent()
-			if card.has_meta(CARD_REMOVING_META) and card.get_meta(CARD_REMOVING_META):
+			if card.has_meta(CardConstants.CARD_REMOVING_META) and card.get_meta(CardConstants.CARD_REMOVING_META):
 				continue
-			var is_deck_view_card: bool = card.has_meta(DECK_VIEW_CARD_META) and card.get_meta(DECK_VIEW_CARD_META)
+			var is_deck_view_card: bool = card.has_meta(BattleConstants.DECK_VIEW_CARD_META) and card.get_meta(BattleConstants.DECK_VIEW_CARD_META)
 			if deck_view_open and is_deck_view_card:
 				filtered_cards.append(hit)
 			elif not deck_view_open and not is_deck_view_card:

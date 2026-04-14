@@ -2,6 +2,7 @@ extends RefCounted
 class_name EnemyDatabase
 
 const ENEMY_DEFINITIONS := {
+	# Stage 1
 	"training_dummy": {
 		"name": "Training Dummy",
 		"art": "res://battle/art/actors/training_dummy.png",
@@ -17,6 +18,8 @@ const ENEMY_DEFINITIONS := {
 			"wooden_ward": 0.22,
 		},
 	},
+
+	# Stage 2
 	"bramble_husk": {
 		"name": "Bramble Husk",
 		"art": "res://battle/art/actors/bramble_husk.png",
@@ -34,6 +37,8 @@ const ENEMY_DEFINITIONS := {
 			"sap_mend": 0.10,
 		},
 	},
+
+	# Stage 3
 	"ember_dummy": {
 		"name": "Ember Dummy",
 		"art": "res://battle/art/actors/training_dummy.png",

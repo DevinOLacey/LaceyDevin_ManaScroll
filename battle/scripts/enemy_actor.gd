@@ -2,14 +2,13 @@ extends Node2D
 
 signal defeat_animation_finished
 
-const DEFEAT_ANIMATION_DURATION := 0.4
-const DEFEAT_DROP_DISTANCE := 26.0
 const ACTION_POSE_DURATION := 0.8
 const DEATH_POSE_HOLD_DURATION := 0.8
 const DEFAULT_POSE := &"default"
 const ATTACKING_POSE := &"attacking"
 const DEFENDING_POSE := &"defending"
 const DEATH_POSE := &"death"
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 
 var enemy_id := ""
 var enemy_data: Dictionary = {}
@@ -65,9 +64,9 @@ func play_defeat_animation() -> void:
 	await get_tree().create_timer(DEATH_POSE_HOLD_DURATION).timeout
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(self, "position", position + Vector2(0, DEFEAT_DROP_DISTANCE), DEFEAT_ANIMATION_DURATION)
-	tween.tween_property(self, "scale", scale * Vector2(1.08, 0.92), DEFEAT_ANIMATION_DURATION)
-	tween.tween_property(sprite, "modulate", Color(1.0, 0.55, 0.55, 0.0), DEFEAT_ANIMATION_DURATION)
+	tween.tween_property(self, "position", position + Vector2(0, BattleConstants.ENEMY_DEFEAT_DROP_DISTANCE), BattleConstants.ENEMY_DEFEAT_ANIMATION_DURATION)
+	tween.tween_property(self, "scale", scale * Vector2(1.08, 0.92), BattleConstants.ENEMY_DEFEAT_ANIMATION_DURATION)
+	tween.tween_property(sprite, "modulate", Color(1.0, 0.55, 0.55, 0.0), BattleConstants.ENEMY_DEFEAT_ANIMATION_DURATION)
 	await tween.finished
 	defeat_animation_finished.emit()
 

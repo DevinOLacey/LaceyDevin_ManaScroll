@@ -1,13 +1,6 @@
 extends Node2D
 
-const MAX_HAND_SIZE = 7
-const CARD_WIDTH = 200
-const HAND_Y_POSITION = 890
-const DEFAULT_DRAW_SPEED = 0.1
-const MANIFEST_DRAW_SPEED = 1
-const STARTING_HAND_BASE_DELAY = 0.08
-const STARTING_HAND_DELAY_VARIANCE = 0.07
-const DRAW_STAGGER_DELAY = 0.08
+const CardConstants = preload("res://shared/constants/card_constants.gd")
 
 var player_hand = []
 var center_screen_x
@@ -45,7 +38,7 @@ func add_cards_to_hand(cards: Array[Node2D], speed: float, manifest_new_cards: b
 
 	for i in range(player_hand.size()):
 		var hand_card = player_hand[i]
-		var new_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
+		var new_position = Vector2(calculate_card_position(i), CardConstants.HAND_Y_POSITION)
 		hand_card.hand_position = new_position
 		if hand_card not in added_cards or not manifest_new_cards:
 			animate_card_to_position(hand_card, new_position, speed)
@@ -58,7 +51,7 @@ func add_cards_to_hand(cards: Array[Node2D], speed: float, manifest_new_cards: b
 
 
 func get_max_hand_size() -> int:
-	return MAX_HAND_SIZE
+	return CardConstants.MAX_HAND_SIZE
 
 
 func get_hand_size() -> int:
@@ -70,7 +63,7 @@ func get_cards() -> Array:
 
 
 func is_hand_full() -> bool:
-	return player_hand.size() >= MAX_HAND_SIZE
+	return player_hand.size() >= CardConstants.MAX_HAND_SIZE
 
 
 func populate_starting_hand(cards: Array[Node2D]) -> void:
@@ -89,12 +82,12 @@ func populate_starting_hand(cards: Array[Node2D]) -> void:
 
 func update_hand_position(speed, manifested_card = null):
 	for i in range(player_hand.size()):
-		var new_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
+		var new_position = Vector2(calculate_card_position(i), CardConstants.HAND_Y_POSITION)
 		var card = player_hand[i]
 		card.hand_position = new_position
 		if card == manifested_card and card.has_method("manifest_to_position"):
 			card.visible = true
-			card.manifest_to_position(new_position, MANIFEST_DRAW_SPEED)
+			card.manifest_to_position(new_position, CardConstants.MANIFEST_DRAW_SPEED)
 		else:
 			animate_card_to_position(card, new_position, speed)
 
@@ -102,10 +95,10 @@ func update_hand_position(speed, manifested_card = null):
 func update_hand_targets() -> void:
 	for i in range(player_hand.size()):
 		var card = player_hand[i]
-		card.hand_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
+		card.hand_position = Vector2(calculate_card_position(i), CardConstants.HAND_Y_POSITION)
 
 
-func layout_cards_at_row(cards: Array, row_y: float, speed: float = DEFAULT_DRAW_SPEED) -> void:
+func layout_cards_at_row(cards: Array, row_y: float, speed: float = CardConstants.DEFAULT_DRAW_SPEED) -> void:
 	for i in range(cards.size()):
 		var card: Node2D = cards[i]
 		var new_position = Vector2(calculate_card_position_for_count(i, cards.size()), row_y)
@@ -118,8 +111,8 @@ func calculate_card_position(index):
 
 
 func calculate_card_position_for_count(index: int, total_cards: int) -> float:
-	var total_width = (total_cards - 1) * CARD_WIDTH
-	var x_offset = center_screen_x + index * CARD_WIDTH - total_width / 2.0
+	var total_width = (total_cards - 1) * CardConstants.CARD_WIDTH
+	var x_offset = center_screen_x + index * CardConstants.CARD_WIDTH - total_width / 2.0
 	return x_offset
 
 
@@ -143,7 +136,7 @@ func animate_card_to_position(card, target_position, speed, restore_collision_on
 func remove_card_from_hand(card):
 	if card in player_hand:
 		player_hand.erase(card)
-		update_hand_position(DEFAULT_DRAW_SPEED)
+		update_hand_position(CardConstants.DEFAULT_DRAW_SPEED)
 
 
 func has_card(card: Node2D) -> bool:
@@ -169,11 +162,11 @@ func _manifest_starting_hand(cards: Array[Node2D]) -> void:
 
 		card.visible = true
 		if card.has_method("manifest_to_position"):
-			card.manifest_to_position(card.hand_position, MANIFEST_DRAW_SPEED)
+			card.manifest_to_position(card.hand_position, CardConstants.MANIFEST_DRAW_SPEED)
 		else:
-			animate_card_to_position(card, card.hand_position, MANIFEST_DRAW_SPEED)
+			animate_card_to_position(card, card.hand_position, CardConstants.MANIFEST_DRAW_SPEED)
 
-		var delay: float = STARTING_HAND_BASE_DELAY + randf_range(0.0, STARTING_HAND_DELAY_VARIANCE)
+		var delay: float = CardConstants.STARTING_HAND_BASE_DELAY + randf_range(0.0, CardConstants.STARTING_HAND_DELAY_VARIANCE)
 		await get_tree().create_timer(delay).timeout
 
 
@@ -184,9 +177,9 @@ func _manifest_added_cards_staggered(cards: Array[Node2D]) -> void:
 
 		card.visible = true
 		if card.has_method("manifest_to_position"):
-			card.manifest_to_position(card.hand_position, MANIFEST_DRAW_SPEED)
+			card.manifest_to_position(card.hand_position, CardConstants.MANIFEST_DRAW_SPEED)
 		else:
-			animate_card_to_position(card, card.hand_position, MANIFEST_DRAW_SPEED)
+			animate_card_to_position(card, card.hand_position, CardConstants.MANIFEST_DRAW_SPEED)
 
 		if card != cards.back():
-			await get_tree().create_timer(DRAW_STAGGER_DELAY).timeout
+			await get_tree().create_timer(CardConstants.DRAW_STAGGER_DELAY).timeout

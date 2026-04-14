@@ -1,10 +1,7 @@
 extends RefCounted
 
 const CardArtDatabaseResource = preload("res://cards/data/card_art_database.gd")
-
-const FLAME_THRESHOLD := 3
-const EMBER_THRESHOLD := 5
-const BURN_DURATION := 3
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 
 
 static func build_player_cast_resolution(card_id: String, base_card_data: Dictionary, flame_charge: int, ember_charge: int, fire_path_unlocked: bool) -> Dictionary:
@@ -29,7 +26,7 @@ static func build_player_cast_resolution(card_id: String, base_card_data: Dictio
 				result["burn_to_target"] = 1
 			else:
 				result["flame_charge"] = flame_charge + 1
-				if int(result.get("flame_charge", 0)) >= FLAME_THRESHOLD:
+				if int(result.get("flame_charge", 0)) >= BattleConstants.FIRE_FLAME_THRESHOLD:
 					result["flame_charge"] = 0
 					result["flame_bolt_primed"] = true
 		"mana_shield":
@@ -37,7 +34,7 @@ static func build_player_cast_resolution(card_id: String, base_card_data: Dictio
 				result["grant_ember_guard"] = true
 			else:
 				result["ember_charge"] = ember_charge + 1
-				if int(result.get("ember_charge", 0)) >= EMBER_THRESHOLD:
+				if int(result.get("ember_charge", 0)) >= BattleConstants.FIRE_EMBER_THRESHOLD:
 					result["ember_charge"] = 0
 					result["ember_shield_primed"] = true
 
@@ -81,7 +78,7 @@ static func apply_burn(current_stacks: int, current_turns_remaining: int, amount
 
 	return {
 		"stacks": current_stacks + amount,
-		"turns_remaining": BURN_DURATION,
+		"turns_remaining": BattleConstants.FIRE_BURN_DURATION,
 	}
 
 

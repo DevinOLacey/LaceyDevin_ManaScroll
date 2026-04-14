@@ -2,6 +2,7 @@ extends RefCounted
 class_name CardDatabase
 
 const CARD_DEFINITIONS := {
+	# Base player cards
 	"mana_bolt": {
 		"name": "Mana Bolt",
 		"art": "res://cards/art/Mana Bolt.png",
@@ -34,6 +35,8 @@ const CARD_DEFINITIONS := {
 		"effect": "combine",
 		"description": "Fuse the mana of 2 of the same spell together",
 	},
+
+	# Path cards
 	"accelerate_mana_gates": {
 		"name": "Accelerate Mana Gates",
 		"art": "res://cards/art/Accelerate Mana Gates.png",
@@ -54,6 +57,51 @@ const CARD_DEFINITIONS := {
 		"effect": "unstable_discharge",
 		"description": "Charge the battlefield. Your Mana Bolts deal [i][b]+1[/b][/i] damage and Mana Shields give [i][b]+1[/b][/i] block for the rest of combat",
 	},
+	"flame_bolt": {
+		"name": "Flame Bolt",
+		"art": "res://cards/art/Flame Bolt.png",
+		"cost": 1,
+		"category": "spell",
+		"target_group": "enemy",
+		"type": "[b]Spell[/b]",
+		"damage": 5,
+		"effect": null,
+		"description": "Loose a blazing bolt dealing [i][b]5[/b] damage[/i] and inflicting [i][b]1 Burn[/b][/i]",
+	},
+	"ember_shield": {
+		"name": "Ember Shield",
+		"art": "res://cards/art/Ember Shield.png",
+		"cost": 2,
+		"category": "spell",
+		"target_group": "ally",
+		"type": "[b]Spell[/b]",
+		"block": 3,
+		"effect": null,
+		"description": "Wrap yourself in embers [i]blocking [b]3[/b][/i] and gain Ember Guard while you still have block",
+	},
+	"ice_bolt": {
+		"name": "Ice Bolt",
+		"art": "res://cards/art/Ice Bolt.png",
+		"cost": 1,
+		"category": "spell",
+		"target_group": "enemy",
+		"type": "[b]Spell[/b]",
+		"damage": 6,
+		"effect": "ice_bolt",
+		"description": "Hurl a razor shard of frost that [i][b]shatters block[/b][/i] and then deals [i][b]6[/b] damage[/i]",
+	},
+	"frost_armor": {
+		"name": "Frost Armor",
+		"art": "res://cards/art/Frost Armor.png",
+		"cost": 2,
+		"category": "spell",
+		"target_group": "self",
+		"type": "[b]Spell[/b]",
+		"effect": "frost_armor",
+		"description": "Wrap yourself in frozen wards and gain [i][b]1 Frost Armor[/b][/i]. Each charge reflects the next attack",
+	},
+
+	# Enemy cards: Training Dummy
 	"splinter_bolt": {
 		"name": "Splinter Bolt",
 		"art": "res://cards/art/Splinter Bolt.png",
@@ -76,6 +124,8 @@ const CARD_DEFINITIONS := {
 		"effect": null,
 		"description": "Raise a simple bark ward [i]blocking [b]1[/b][/i] damage",
 	},
+
+	# Enemy cards: Bramble Husk
 	"bramble_snap": {
 		"name": "Bramble Snap",
 		"art": "res://cards/art/Bramble Snap.png",
@@ -109,55 +159,12 @@ const CARD_DEFINITIONS := {
 		"effect": null,
 		"description": "Seal the cracks with glowing sap and [i]heal [b]4[/b][/i] health",
 	},
-	"flame_bolt": {
-		"name": "Flame Bolt",
-		"art": "res://cards/art/Flame Bolt.png",
-		"cost": 1,
-		"category": "spell",
-		"target_group": "enemy",
-		"type": "[b]Spell[/b]",
-		"damage": 5,
-		"effect": null,
-		"description": "Loose a blazing bolt dealing [i][b]5[/b] damage[/i] and inflicting [i][b]1 Burn[/b][/i]",
-	},
-	"ember_shield": {
-		"name": "Ember Shield",
-		"art": "res://cards/art/Ember Shield.png",
-		"cost": 1,
-		"category": "spell",
-		"target_group": "ally",
-		"type": "[b]Spell[/b]",
-		"block": 3,
-		"effect": null,
-		"description": "Wrap yourself in embers [i]blocking [b]3[/b][/i] and gain Ember Guard while you still have block",
-	},
-	"ice_bolt": {
-		"name": "Ice Bolt",
-		"art": "res://cards/art/Ice Bolt.png",
-		"cost": 1,
-		"category": "spell",
-		"target_group": "enemy",
-		"type": "[b]Spell[/b]",
-		"damage": 6,
-		"effect": "ice_bolt",
-		"description": "Hurl a razor shard of frost that [i][b]shatters block[/b][/i] and then deals [i][b]6[/b] damage[/i]",
-	},
-	"frost_armor": {
-		"name": "Frost Armor",
-		"art": "res://cards/art/Frost Armor.png",
-		"cost": 1,
-		"category": "spell",
-		"target_group": "self",
-		"type": "[b]Spell[/b]",
-		"effect": "frost_armor",
-		"description": "Wrap yourself in frozen wards and gain [i][b]1 Frost Armor[/b][/i]. Each charge reflects the next attack",
-	}
 }
 
 const CARD_DRAW_WEIGHTS := {
 	"mana_bolt": 0.43,
 	"mana_shield": 0.43,
-	"fuse_mana": 0.15
+	"fuse_mana": 0.15,
 }
 
 

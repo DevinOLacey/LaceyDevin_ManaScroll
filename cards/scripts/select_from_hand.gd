@@ -3,13 +3,7 @@ extends Node2D
 signal selection_confirmed(selected_cards: Array)
 
 const BattleFusionService = preload("res://battle/scripts/battle_fusion_service.gd")
-
-const ROW_Y := 400.0
-const LAYOUT_SPEED := 0.15
-const BASE_SCALE := Vector2.ONE
-const SELECTED_SCALE := Vector2(1.2, 1.2)
-const DISABLED_MODULATE := Color(1, 1, 1, 0.35)
-const ENABLED_MODULATE := Color(1, 1, 1, 1)
+const CardConstants = preload("res://shared/constants/card_constants.gd")
 
 var source_cards: Array[Node2D] = []
 var selected_cards: Array[Node2D] = []
@@ -80,9 +74,9 @@ func _refresh_selection_state() -> void:
 		if source_card == null or not is_instance_valid(source_card):
 			continue
 		var is_selected := source_card in selected_cards
-		source_card.scale = SELECTED_SCALE if is_selected else BASE_SCALE
+		source_card.scale = CardConstants.SELECTION_SELECTED_SCALE if is_selected else CardConstants.SELECTION_BASE_SCALE
 		source_card.z_index = 20 if is_selected else 10
-		source_card.modulate = ENABLED_MODULATE if _is_card_selectable(source_card) or is_selected else DISABLED_MODULATE
+		source_card.modulate = CardConstants.SELECTION_ENABLED_MODULATE if _is_card_selectable(source_card) or is_selected else CardConstants.SELECTION_DISABLED_MODULATE
 
 	confirm_button.disabled = not _is_selection_complete()
 	confirm_button.mouse_filter = Control.MOUSE_FILTER_STOP if not confirm_button.disabled else Control.MOUSE_FILTER_IGNORE
@@ -127,19 +121,19 @@ func _on_confirm_pressed() -> void:
 
 func _layout_source_cards() -> void:
 	if player_hand_ref and player_hand_ref.has_method("layout_cards_at_row"):
-		player_hand_ref.layout_cards_at_row(source_cards, ROW_Y, LAYOUT_SPEED)
+		player_hand_ref.layout_cards_at_row(source_cards, CardConstants.SELECTION_ROW_Y, CardConstants.SELECTION_LAYOUT_SPEED)
 
 
 func _restore_cards() -> void:
 	for source_card in source_cards:
 		if source_card == null or not is_instance_valid(source_card):
 			continue
-		source_card.scale = BASE_SCALE
-		source_card.modulate = ENABLED_MODULATE
+		source_card.scale = CardConstants.SELECTION_BASE_SCALE
+		source_card.modulate = CardConstants.SELECTION_ENABLED_MODULATE
 		source_card.z_index = 1
 
 	if player_hand_ref and player_hand_ref.has_method("update_hand_position"):
-		player_hand_ref.update_hand_position(LAYOUT_SPEED)
+		player_hand_ref.update_hand_position(CardConstants.SELECTION_LAYOUT_SPEED)
 
 
 func _hide_placeholder_cards() -> void:

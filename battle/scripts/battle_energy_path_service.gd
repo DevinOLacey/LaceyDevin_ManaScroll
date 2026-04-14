@@ -1,9 +1,6 @@
 extends RefCounted
 
-const CHARGE_THRESHOLD := 10
-const SHOCK_THRESHOLD := 4
-const ACCELERATE_MANA_GATES_CARD_ID := "accelerate_mana_gates"
-const UNSTABLE_DISCHARGE_CARD_ID := "unstable_discharge"
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 
 
 static func build_player_cast_resolution(card_id: String, base_card_data: Dictionary, energy_state: Dictionary, energy_path_unlocked: bool) -> Dictionary:
@@ -24,28 +21,28 @@ static func build_player_cast_resolution(card_id: String, base_card_data: Dictio
 	match card_id:
 		"mana_shield":
 			result["charge_stacks"] = int(result.get("charge_stacks", 0)) + 1
-			if int(result.get("charge_stacks", 0)) >= CHARGE_THRESHOLD:
+			if int(result.get("charge_stacks", 0)) >= BattleConstants.ENERGY_CHARGE_THRESHOLD:
 				result["charge_stacks"] = 0
 				var queued_draws: Array = result.get("queued_draw_card_ids", [])
-				queued_draws.append(ACCELERATE_MANA_GATES_CARD_ID)
+				queued_draws.append(BattleConstants.ENERGY_ACCELERATE_MANA_GATES_CARD_ID)
 				result["queued_draw_card_ids"] = queued_draws
 				var charge_messages: Array = result.get("extra_messages", [])
 				charge_messages.append("Charge surges. Accelerate Mana Gates is guaranteed on a future draw.")
 				result["extra_messages"] = charge_messages
 		"mana_bolt":
 			result["shock_stacks"] = int(result.get("shock_stacks", 0)) + 1
-			if int(result.get("shock_stacks", 0)) >= SHOCK_THRESHOLD:
+			if int(result.get("shock_stacks", 0)) >= BattleConstants.ENERGY_SHOCK_THRESHOLD:
 				result["shock_stacks"] = 0
 				var queued_draws: Array = result.get("queued_draw_card_ids", [])
-				queued_draws.append(UNSTABLE_DISCHARGE_CARD_ID)
+				queued_draws.append(BattleConstants.ENERGY_UNSTABLE_DISCHARGE_CARD_ID)
 				result["queued_draw_card_ids"] = queued_draws
 				var shock_messages: Array = result.get("extra_messages", [])
 				shock_messages.append("Shock peaks. Unstable Discharge is guaranteed on a future draw.")
 				result["extra_messages"] = shock_messages
-		ACCELERATE_MANA_GATES_CARD_ID:
+		BattleConstants.ENERGY_ACCELERATE_MANA_GATES_CARD_ID:
 			result["grant_spell_actions"] = 1
 			result["refresh_hand_cards"] = true
-		UNSTABLE_DISCHARGE_CARD_ID:
+		BattleConstants.ENERGY_UNSTABLE_DISCHARGE_CARD_ID:
 			result["unstable_discharge_bonus"] = int(result.get("unstable_discharge_bonus", 0)) + 1
 			result["refresh_hand_cards"] = true
 			var discharge_messages: Array = result.get("extra_messages", [])
@@ -106,9 +103,9 @@ static func decorate_card_data(card_id: String, card_data: Dictionary, unstable_
 static func get_mechanics_text(energy_state: Dictionary) -> String:
 	return "Path of Energy\nCharge %d/%d | Shock %d/%d | Discharge +%d" % [
 		int(energy_state.get("charge_stacks", 0)),
-		CHARGE_THRESHOLD,
+		BattleConstants.ENERGY_CHARGE_THRESHOLD,
 		int(energy_state.get("shock_stacks", 0)),
-		SHOCK_THRESHOLD,
+		BattleConstants.ENERGY_SHOCK_THRESHOLD,
 		int(energy_state.get("unstable_discharge_bonus", 0)),
 	]
 

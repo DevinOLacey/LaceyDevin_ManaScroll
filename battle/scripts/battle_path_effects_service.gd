@@ -4,14 +4,7 @@ const CombatCardDatabase = preload("res://cards/data/card_database.gd")
 const BattleEnergyPathService = preload("res://battle/scripts/battle_energy_path_service.gd")
 const BattleFirePathService = preload("res://battle/scripts/battle_fire_path_service.gd")
 const BattleFrostPathService = preload("res://battle/scripts/battle_frost_path_service.gd")
-
-const PATH_OF_FLAME := "path_of_flame"
-const PATH_OF_ENERGY := "path_of_energy"
-const PATH_OF_FROST := "path_of_frost"
-
-const FLAME_DECK_VIEW_CARD_IDS := ["flame_bolt", "ember_shield"]
-const ENERGY_DECK_VIEW_CARD_IDS := ["accelerate_mana_gates", "unstable_discharge"]
-const FROST_DECK_VIEW_CARD_IDS := ["ice_bolt", "frost_armor"]
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 
 
 static func create_runtime_state() -> Dictionary:
@@ -34,12 +27,12 @@ static func has_path(runtime_state: Dictionary, path_id: String) -> bool:
 
 
 static func reset_for_new_stage(runtime_state: Dictionary) -> void:
-	if has_path(runtime_state, PATH_OF_FLAME):
-		runtime_state["path_states"][PATH_OF_FLAME] = _build_default_fire_state()
-	if has_path(runtime_state, PATH_OF_ENERGY):
-		runtime_state["path_states"][PATH_OF_ENERGY] = BattleEnergyPathService.build_default_state()
-	if has_path(runtime_state, PATH_OF_FROST):
-		runtime_state["path_states"][PATH_OF_FROST] = BattleFrostPathService.build_default_state()
+	if has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
+		runtime_state["path_states"][BattleConstants.PATH_OF_FLAME] = _build_default_fire_state()
+	if has_path(runtime_state, BattleConstants.PATH_OF_ENERGY):
+		runtime_state["path_states"][BattleConstants.PATH_OF_ENERGY] = BattleEnergyPathService.build_default_state()
+	if has_path(runtime_state, BattleConstants.PATH_OF_FROST):
+		runtime_state["path_states"][BattleConstants.PATH_OF_FROST] = BattleFrostPathService.build_default_state()
 
 
 static func build_player_cast_resolution(runtime_state: Dictionary, card_id: String, card_data: Dictionary) -> Dictionary:
@@ -51,7 +44,7 @@ static func build_player_cast_resolution(runtime_state: Dictionary, card_id: Str
 		"refresh_hand_cards": false,
 	}
 
-	if has_path(runtime_state, PATH_OF_FLAME):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
 		var fire_state := _get_fire_state(runtime_state)
 		var fire_resolution := BattleFirePathService.build_player_cast_resolution(
 			card_id,
@@ -73,7 +66,7 @@ static func build_player_cast_resolution(runtime_state: Dictionary, card_id: Str
 			result["extra_messages"] = extra_messages
 		_store_fire_state(runtime_state, fire_state)
 
-	if has_path(runtime_state, PATH_OF_ENERGY):
+	if has_path(runtime_state, BattleConstants.PATH_OF_ENERGY):
 		var energy_state := _get_energy_state(runtime_state)
 		var energy_resolution := BattleEnergyPathService.build_player_cast_resolution(
 			card_id,
@@ -97,7 +90,7 @@ static func build_player_cast_resolution(runtime_state: Dictionary, card_id: Str
 					extra_messages.append(str(message))
 		result["extra_messages"] = extra_messages
 
-	if has_path(runtime_state, PATH_OF_FROST):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FROST):
 		var frost_state := _get_frost_state(runtime_state)
 		var frost_resolution := BattleFrostPathService.build_player_cast_resolution(
 			card_id,
@@ -129,7 +122,7 @@ static func modify_drawn_card(runtime_state: Dictionary, card_id: String, base_c
 		"card_data": base_card_data.duplicate(true),
 	}
 
-	if has_path(runtime_state, PATH_OF_FLAME):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
 		var fire_state := _get_fire_state(runtime_state)
 		var modified_result := BattleFirePathService.modify_drawn_card(
 			card_id,
@@ -145,7 +138,7 @@ static func modify_drawn_card(runtime_state: Dictionary, card_id: String, base_c
 		_store_fire_state(runtime_state, fire_state)
 		result = modified_result
 
-	if has_path(runtime_state, PATH_OF_ENERGY):
+	if has_path(runtime_state, BattleConstants.PATH_OF_ENERGY):
 		var energy_state := _get_energy_state(runtime_state)
 		var card_definitions := CombatCardDatabase.get_card_definitions()
 		var modified_result := BattleEnergyPathService.modify_drawn_card(
@@ -160,7 +153,7 @@ static func modify_drawn_card(runtime_state: Dictionary, card_id: String, base_c
 		result["card_id"] = str(modified_result.get("card_id", result.get("card_id", card_id)))
 		result["card_data"] = modified_result.get("card_data", result.get("card_data", base_card_data))
 
-	if has_path(runtime_state, PATH_OF_FROST):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FROST):
 		var frost_state := _get_frost_state(runtime_state)
 		var modified_result := BattleFrostPathService.modify_drawn_card(
 			str(result.get("card_id", card_id)),
@@ -181,9 +174,9 @@ static func modify_drawn_card(runtime_state: Dictionary, card_id: String, base_c
 
 static func decorate_card_data(runtime_state: Dictionary, card_id: String, card_data: Dictionary) -> Dictionary:
 	var updated_card_data := card_data.duplicate(true)
-	if has_path(runtime_state, PATH_OF_FLAME):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
 		updated_card_data = BattleFirePathService.append_path_gain_text(card_id, updated_card_data)
-	if has_path(runtime_state, PATH_OF_ENERGY):
+	if has_path(runtime_state, BattleConstants.PATH_OF_ENERGY):
 		var energy_state := _get_energy_state(runtime_state)
 		updated_card_data = BattleEnergyPathService.decorate_card_data(
 			card_id,
@@ -191,30 +184,30 @@ static func decorate_card_data(runtime_state: Dictionary, card_id: String, card_
 			int(energy_state.get("unstable_discharge_bonus", 0)),
 			true
 		)
-	if has_path(runtime_state, PATH_OF_FROST):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FROST):
 		updated_card_data = BattleFrostPathService.append_path_gain_text(card_id, updated_card_data)
 	return updated_card_data
 
 
 static func get_class_mechanics_text(runtime_state: Dictionary) -> String:
 	var mechanic_sections: Array[String] = []
-	if has_path(runtime_state, PATH_OF_FLAME):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
 		var fire_state := _get_fire_state(runtime_state)
-		var flame_status := "Flame %d/%d" % [int(fire_state.get("flame_charge", 0)), BattleFirePathService.FLAME_THRESHOLD]
+		var flame_status := "Flame %d/%d" % [int(fire_state.get("flame_charge", 0)), BattleConstants.FIRE_FLAME_THRESHOLD]
 		if bool(fire_state.get("flame_bolt_primed", false)):
 			flame_status = "Flame Bolt primed"
 
-		var ember_status := "Ember %d/%d" % [int(fire_state.get("ember_charge", 0)), BattleFirePathService.EMBER_THRESHOLD]
+		var ember_status := "Ember %d/%d" % [int(fire_state.get("ember_charge", 0)), BattleConstants.FIRE_EMBER_THRESHOLD]
 		if bool(fire_state.get("ember_shield_primed", false)):
 			ember_status = "Ember Shield primed"
 
 		var guard_status := "Ember Guard active" if bool(fire_state.get("ember_guard_active", false)) else "Ember Guard inactive"
 		mechanic_sections.append("Path of Flame\n%s | %s | %s" % [flame_status, ember_status, guard_status])
 
-	if has_path(runtime_state, PATH_OF_ENERGY):
+	if has_path(runtime_state, BattleConstants.PATH_OF_ENERGY):
 		var energy_state := _get_energy_state(runtime_state)
 		mechanic_sections.append(BattleEnergyPathService.get_mechanics_text(energy_state))
-	if has_path(runtime_state, PATH_OF_FROST):
+	if has_path(runtime_state, BattleConstants.PATH_OF_FROST):
 		var frost_state := _get_frost_state(runtime_state)
 		mechanic_sections.append(BattleFrostPathService.get_mechanics_text(frost_state))
 
@@ -223,12 +216,12 @@ static func get_class_mechanics_text(runtime_state: Dictionary) -> String:
 
 static func get_deck_view_card_ids(runtime_state: Dictionary, base_card_ids: Array[String]) -> Array[String]:
 	var deck_view_card_ids: Array[String] = base_card_ids.duplicate()
-	if has_path(runtime_state, PATH_OF_FLAME):
-		_append_unique_card_ids(deck_view_card_ids, FLAME_DECK_VIEW_CARD_IDS)
-	if has_path(runtime_state, PATH_OF_ENERGY):
-		_append_unique_card_ids(deck_view_card_ids, ENERGY_DECK_VIEW_CARD_IDS)
-	if has_path(runtime_state, PATH_OF_FROST):
-		_append_unique_card_ids(deck_view_card_ids, FROST_DECK_VIEW_CARD_IDS)
+	if has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
+		_append_unique_card_ids(deck_view_card_ids, BattleConstants.FLAME_DECK_VIEW_CARD_IDS)
+	if has_path(runtime_state, BattleConstants.PATH_OF_ENERGY):
+		_append_unique_card_ids(deck_view_card_ids, BattleConstants.ENERGY_DECK_VIEW_CARD_IDS)
+	if has_path(runtime_state, BattleConstants.PATH_OF_FROST):
+		_append_unique_card_ids(deck_view_card_ids, BattleConstants.FROST_DECK_VIEW_CARD_IDS)
 	return deck_view_card_ids
 
 
@@ -241,13 +234,13 @@ static func tick_enemy_burn(current_health: int, current_stacks: int, current_tu
 
 
 static func is_ember_guard_active(runtime_state: Dictionary) -> bool:
-	if not has_path(runtime_state, PATH_OF_FLAME):
+	if not has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
 		return false
 	return bool(_get_fire_state(runtime_state).get("ember_guard_active", false))
 
 
 static func set_ember_guard_active(runtime_state: Dictionary, active: bool) -> void:
-	if not has_path(runtime_state, PATH_OF_FLAME):
+	if not has_path(runtime_state, BattleConstants.PATH_OF_FLAME):
 		return
 	var fire_state := _get_fire_state(runtime_state)
 	fire_state["ember_guard_active"] = active
@@ -255,13 +248,13 @@ static func set_ember_guard_active(runtime_state: Dictionary, active: bool) -> v
 
 
 static func get_frost_armor_charges(runtime_state: Dictionary) -> int:
-	if not has_path(runtime_state, PATH_OF_FROST):
+	if not has_path(runtime_state, BattleConstants.PATH_OF_FROST):
 		return 0
 	return int(_get_frost_state(runtime_state).get("frost_armor_charges", 0))
 
 
 static func set_frost_armor_charges(runtime_state: Dictionary, charges: int) -> void:
-	if not has_path(runtime_state, PATH_OF_FROST):
+	if not has_path(runtime_state, BattleConstants.PATH_OF_FROST):
 		return
 	var frost_state := _get_frost_state(runtime_state)
 	frost_state["frost_armor_charges"] = maxi(0, charges)
@@ -270,37 +263,37 @@ static func set_frost_armor_charges(runtime_state: Dictionary, charges: int) -> 
 
 static func _get_fire_state(runtime_state: Dictionary) -> Dictionary:
 	var path_states = runtime_state.get("path_states", {})
-	var fire_state: Dictionary = path_states.get(PATH_OF_FLAME, _build_default_fire_state()).duplicate(true)
+	var fire_state: Dictionary = path_states.get(BattleConstants.PATH_OF_FLAME, _build_default_fire_state()).duplicate(true)
 	return fire_state
 
 
 static func _store_fire_state(runtime_state: Dictionary, fire_state: Dictionary) -> void:
 	var path_states = runtime_state.get("path_states", {})
-	path_states[PATH_OF_FLAME] = fire_state.duplicate(true)
+	path_states[BattleConstants.PATH_OF_FLAME] = fire_state.duplicate(true)
 	runtime_state["path_states"] = path_states
 
 
 static func _get_energy_state(runtime_state: Dictionary) -> Dictionary:
 	var path_states = runtime_state.get("path_states", {})
-	var energy_state: Dictionary = path_states.get(PATH_OF_ENERGY, BattleEnergyPathService.build_default_state()).duplicate(true)
+	var energy_state: Dictionary = path_states.get(BattleConstants.PATH_OF_ENERGY, BattleEnergyPathService.build_default_state()).duplicate(true)
 	return energy_state
 
 
 static func _store_energy_state(runtime_state: Dictionary, energy_state: Dictionary) -> void:
 	var path_states = runtime_state.get("path_states", {})
-	path_states[PATH_OF_ENERGY] = energy_state.duplicate(true)
+	path_states[BattleConstants.PATH_OF_ENERGY] = energy_state.duplicate(true)
 	runtime_state["path_states"] = path_states
 
 
 static func _get_frost_state(runtime_state: Dictionary) -> Dictionary:
 	var path_states = runtime_state.get("path_states", {})
-	var frost_state: Dictionary = path_states.get(PATH_OF_FROST, BattleFrostPathService.build_default_state()).duplicate(true)
+	var frost_state: Dictionary = path_states.get(BattleConstants.PATH_OF_FROST, BattleFrostPathService.build_default_state()).duplicate(true)
 	return frost_state
 
 
 static func _store_frost_state(runtime_state: Dictionary, frost_state: Dictionary) -> void:
 	var path_states = runtime_state.get("path_states", {})
-	path_states[PATH_OF_FROST] = frost_state.duplicate(true)
+	path_states[BattleConstants.PATH_OF_FROST] = frost_state.duplicate(true)
 	runtime_state["path_states"] = path_states
 
 

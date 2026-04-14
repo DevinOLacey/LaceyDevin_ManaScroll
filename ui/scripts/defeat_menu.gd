@@ -1,7 +1,6 @@
 extends Control
 
-const BATTLE_SCENE_PATH := "res://scenes/main.tscn"
-const MAIN_MENU_SCENE_PATH := "res://ui/scenes/main_menu.tscn"
+const UIConstants = preload("res://shared/constants/ui_constants.gd")
 
 @export var intro_delay := 0.12
 @export var fade_duration := 0.35
@@ -34,8 +33,8 @@ func _play_intro() -> void:
 
 
 func _on_restart_button_pressed() -> void:
-	get_tree().change_scene_to_file(BATTLE_SCENE_PATH)
+	get_tree().change_scene_to_file(UIConstants.BATTLE_SCENE_PATH)
 
 
 func _on_exit_button_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
+	get_tree().change_scene_to_file(UIConstants.MAIN_MENU_SCENE_PATH)

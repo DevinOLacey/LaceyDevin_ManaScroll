@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ddd3hdgfh1qfc"]
 
 [ext_resource type="PackedScene" uid="uid://c2s7aywrd3dth" path="res://cards/scenes/card_manager.tscn" id="1_0wfyh"]
+[ext_resource type="Script" path="res://battle/scripts/player_actor.gd" id="3_0ld40"]
 [ext_resource type="PackedScene" uid="uid://my3huekfu038" path="res://cards/scenes/player_hand.tscn" id="3_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://dbk7agsrxcp17" path="res://battle/scenes/input_manager.tscn" id="4_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://deck/scenes/deck.tscn" id="5_tbgi4"]
@@ -34,6 +35,7 @@ texture = ExtResource("18_combat_bg")
 [node name="Player" parent="PlayerSide/PlayerSprites" unique_id=2089395328 instance=ExtResource("8_85g3d")]
 position = Vector2(298, 491)
 scale = Vector2(2, 2)
+script = ExtResource("3_0ld40")
 
 [node name="PlayerStats" type="Node" parent="PlayerSide" unique_id=965401508]
 
