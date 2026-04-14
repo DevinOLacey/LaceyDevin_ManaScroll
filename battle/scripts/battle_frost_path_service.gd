@@ -1,9 +1,7 @@
 extends RefCounted
 
 const CardArtDatabaseResource = preload("res://cards/data/card_art_database.gd")
-
-const FROST_THRESHOLD := 2
-const CHILL_THRESHOLD := 3
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 
 
 static func build_player_cast_resolution(card_id: String, base_card_data: Dictionary, frost_state: Dictionary, frost_path_unlocked: bool) -> Dictionary:
@@ -26,7 +24,7 @@ static func build_player_cast_resolution(card_id: String, base_card_data: Dictio
 				pass
 			else:
 				result["frost_stacks"] = int(result.get("frost_stacks", 0)) + 1
-				if int(result.get("frost_stacks", 0)) >= FROST_THRESHOLD:
+				if int(result.get("frost_stacks", 0)) >= BattleConstants.FROST_FROST_THRESHOLD:
 					result["frost_stacks"] = 0
 					result["ice_bolt_primed"] = true
 					var frost_messages: Array = result.get("extra_messages", [])
@@ -40,7 +38,7 @@ static func build_player_cast_resolution(card_id: String, base_card_data: Dictio
 				result["extra_messages"] = armor_messages
 			else:
 				result["chill_stacks"] = int(result.get("chill_stacks", 0)) + 1
-				if int(result.get("chill_stacks", 0)) >= CHILL_THRESHOLD:
+				if int(result.get("chill_stacks", 0)) >= BattleConstants.FROST_CHILL_THRESHOLD:
 					result["chill_stacks"] = 0
 					result["frost_armor_primed"] = true
 					var chill_messages: Array = result.get("extra_messages", [])
@@ -94,14 +92,14 @@ static func append_path_gain_text(card_id: String, card_data: Dictionary) -> Dic
 static func get_mechanics_text(frost_state: Dictionary) -> String:
 	var frost_status := "Frost %d/%d" % [
 		int(frost_state.get("frost_stacks", 0)),
-		FROST_THRESHOLD,
+		BattleConstants.FROST_FROST_THRESHOLD,
 	]
 	if bool(frost_state.get("ice_bolt_primed", false)):
 		frost_status = "Ice Bolt primed"
 
 	var chill_status := "Chill %d/%d" % [
 		int(frost_state.get("chill_stacks", 0)),
-		CHILL_THRESHOLD,
+		BattleConstants.FROST_CHILL_THRESHOLD,
 	]
 	if bool(frost_state.get("frost_armor_primed", false)):
 		chill_status = "Frost Armor primed"

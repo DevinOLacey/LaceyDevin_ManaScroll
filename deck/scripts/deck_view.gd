@@ -1,8 +1,8 @@
 extends Node2D
 
-const DECK_VIEW_CARD_META = "deck_view_card"
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
+const DeckConstants = preload("res://shared/constants/deck_constants.gd")
 const HOVER_PREVIEW_SCENE = preload("res://cards/scenes/card_x_4_scale.tscn")
-const HOVER_PREVIEW_OFFSET = Vector2(0, -20)
 
 var card_definitions := {}
 var draw_weights := {}
@@ -73,7 +73,7 @@ func hide_view() -> void:
 
 
 func _prepare_card_slot(card_slot: Node2D) -> void:
-	card_slot.set_meta(DECK_VIEW_CARD_META, true)
+	card_slot.set_meta(BattleConstants.DECK_VIEW_CARD_META, true)
 
 	if "registers_hover_signals" in card_slot:
 		card_slot.registers_hover_signals = true
@@ -169,7 +169,7 @@ func _show_hover_preview(card_slot: Node2D) -> void:
 	add_child(hover_preview)
 	_copy_card_display(hover_preview, card_slot)
 	_disable_preview_mouse_interactions(hover_preview)
-	hover_preview.position = card_slot.position + HOVER_PREVIEW_OFFSET
+	hover_preview.position = card_slot.position + DeckConstants.HOVER_PREVIEW_OFFSET
 	hover_preview.z_index = 100
 
 

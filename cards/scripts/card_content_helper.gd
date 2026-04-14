@@ -1,10 +1,6 @@
 extends RefCounted
 
-const LABEL_Z_INDEX = 5
-const MIN_AUTO_FIT_FONT_SIZE = 4
-
-const LABEL_NAMES = ["Name", "Cost", "Type", "Description", "DrawChance"]
-const VISIBLE_SPRITE_PATHS = ["Frame", "Art", "Sprite2D", "Sprite2D/Sprite2D"]
+const CardConstants = preload("res://shared/constants/card_constants.gd")
 
 
 static func apply_card_data(card: Node2D, card_id: String, card_data: Dictionary) -> void:
@@ -26,12 +22,12 @@ static func apply_card_data(card: Node2D, card_id: String, card_data: Dictionary
 
 
 static func set_visuals_visible(card: Node2D, visible_state: bool) -> void:
-	for sprite_path in VISIBLE_SPRITE_PATHS:
+	for sprite_path in CardConstants.VISIBLE_SPRITE_PATHS:
 		var sprite: Sprite2D = card.get_node_or_null(sprite_path)
 		if sprite:
 			sprite.visible = visible_state
 
-	for label_name in LABEL_NAMES:
+	for label_name in CardConstants.LABEL_NAMES:
 		var label: RichTextLabel = card.get_node_or_null(label_name)
 		if label:
 			label.visible = visible_state
@@ -45,16 +41,16 @@ static func apply_text_font_sizes(card: Node2D, description_size_preset: int, fo
 
 
 static func apply_label_z_index(card: Node2D) -> void:
-	for label_name in LABEL_NAMES:
+	for label_name in CardConstants.LABEL_NAMES:
 		var label: RichTextLabel = card.get_node_or_null(label_name)
 		if label:
-			label.z_index = LABEL_Z_INDEX
+			label.z_index = CardConstants.LABEL_Z_INDEX
 
 
 static func copy_display_from(target_card: Node2D, source_card: Node2D) -> void:
 	_copy_sprite_branch(target_card, source_card)
 
-	for label_name in LABEL_NAMES:
+	for label_name in CardConstants.LABEL_NAMES:
 		var target_label: RichTextLabel = target_card.get_node_or_null(label_name)
 		var source_label: RichTextLabel = source_card.get_node_or_null(label_name)
 		if target_label and source_label:
@@ -115,7 +111,7 @@ static func fit_label_to_height(label: RichTextLabel) -> void:
 	if starting_font_size <= 0:
 		return
 
-	for font_size in range(starting_font_size, MIN_AUTO_FIT_FONT_SIZE - 1, -1):
+	for font_size in range(starting_font_size, CardConstants.MIN_AUTO_FIT_FONT_SIZE - 1, -1):
 		apply_label_font_size(label, font_size)
 		label.queue_redraw()
 		if label.get_content_height() <= label.size.y:
@@ -138,7 +134,7 @@ static func fit_label_group_to_height(labels: Array) -> void:
 	if valid_labels.is_empty() or starting_font_size <= 0:
 		return
 
-	for font_size in range(starting_font_size, MIN_AUTO_FIT_FONT_SIZE - 1, -1):
+	for font_size in range(starting_font_size, CardConstants.MIN_AUTO_FIT_FONT_SIZE - 1, -1):
 		for label in valid_labels:
 			apply_label_font_size(label, font_size)
 			label.queue_redraw()

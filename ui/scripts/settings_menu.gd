@@ -1,7 +1,7 @@
 extends Control
 
 const SETTINGS_STATE = preload("res://ui/scripts/settings_state.gd")
-const MAIN_MENU_SCENE_PATH := "res://ui/scenes/main_menu.tscn"
+const UIConstants = preload("res://shared/constants/ui_constants.gd")
 
 @onready var fullscreen_toggle: CheckButton = %FullscreenToggle
 @onready var volume_slider: HSlider = %VolumeSlider
@@ -46,4 +46,4 @@ func _on_volume_slider_value_changed(value: float) -> void:
 
 
 func _on_back_button_pressed() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
+	get_tree().change_scene_to_file(UIConstants.MAIN_MENU_SCENE_PATH)
