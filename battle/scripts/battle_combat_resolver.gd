@@ -12,6 +12,7 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 		"damage_done": 0,
 		"block_done": 0,
 		"heal_done": 0,
+		"blocked_damage": 0,
 		"ember_burn_to_attacker": 0,
 		"frost_armor_reflected_damage": 0,
 		"frost_armor_charges_consumed": 0,
@@ -38,6 +39,7 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 			var damage_resolution := _resolve_damage(card_effect, target_key, total_damage, result, caster)
 			var damage_dealt := int(damage_resolution.get("health_damage", 0))
 			result["damage_done"] = damage_dealt
+			result["blocked_damage"] = int(damage_resolution.get("blocked_damage", 0))
 			result["ember_burn_to_attacker"] = int(damage_resolution.get("ember_burn_to_attacker", 0))
 			if caster == "player":
 				if card_effect == "ice_bolt":
@@ -108,6 +110,7 @@ static func _deal_damage_to_target(target_key: String, amount: int, state: Dicti
 
 	return {
 		"health_damage": health_damage,
+		"blocked_damage": blocked_damage,
 		"ember_burn_to_attacker": ember_burn_to_attacker,
 	}
 
@@ -117,6 +120,7 @@ static func _deal_shatter_damage_to_target(target_key: String, amount: int, stat
 	_set_health_value(target_key, maxi(0, _get_health_value(target_key, state) - amount), state)
 	return {
 		"health_damage": amount,
+		"blocked_damage": 0,
 		"ember_burn_to_attacker": 0,
 	}
 

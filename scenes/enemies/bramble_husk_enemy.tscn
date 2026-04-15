@@ -1,25 +1,63 @@
 [gd_scene format=3 uid="uid://43yhba8bcca0"]
 
 [ext_resource type="Script" uid="uid://dd0f4mk4d76ce" path="res://battle/scripts/enemy_actor.gd" id="1_enemy_script"]
-[ext_resource type="Texture2D" uid="uid://c0nybnqy3u5a2" path="res://battle/art/actors/bramble_husk.png" id="2_enemy_art"]
+[ext_resource type="Texture2D" uid="uid://6l2280yecllb" path="res://battle/art/actors/Bramble Husk sprite sheet.png" id="2_47l2v"]
+[ext_resource type="Texture2D" uid="uid://dsiwtnq1igt87" path="res://battle/art/actors/bramble husk extended sprite sheet.png" id="3_kpefm"]
 
 [sub_resource type="RectangleShape2D" id="1_hitbox"]
-size = Vector2(174, 234)
+size = Vector2(144, 154)
 
 [node name="Enemy" type="Node2D" unique_id=1132013170]
 scale = Vector2(0.5, 0.5)
 script = ExtResource("1_enemy_script")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1747525427]
+[node name="default" type="Sprite2D" parent="." unique_id=1747525427]
 position = Vector2(6, -26)
 scale = Vector2(0.42, 0.42)
-texture = ExtResource("2_enemy_art")
+texture = ExtResource("2_47l2v")
+region_enabled = true
+region_rect = Rect2(180.70264, 65.18182, 351.2398, 384.29764)
+
+[node name="death" type="Sprite2D" parent="." unique_id=640040498]
+visible = false
+position = Vector2(5.9999995, 0)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("2_47l2v")
+region_enabled = true
+region_rect = Rect2(195, 672, 581, 251)
+
+[node name="attack" type="Sprite2D" parent="." unique_id=1999295751]
+visible = false
+position = Vector2(-9.000002, -40.265)
+scale = Vector2(0.33155078, 0.4606142)
+texture = ExtResource("3_kpefm")
+region_enabled = true
+region_rect = Rect2(149.40009, 69.600006, 561.33636, 407.4826)
+
+[node name="heal" type="Sprite2D" parent="." unique_id=1739061303]
+visible = false
+position = Vector2(12.000004, -71.774994)
+scale = Vector2(0.3237774, 0.52336735)
+texture = ExtResource("2_47l2v")
+region_enabled = true
+region_rect = Rect2(867, 453, 593, 490)
+
+[node name="defend" type="Sprite2D" parent="." unique_id=1778134884]
+visible = false
+position = Vector2(5.000006, -35.30999)
+scale = Vector2(0.32019705, 0.42327017)
+texture = ExtResource("3_kpefm")
+region_enabled = true
+region_rect = Rect2(918.4116, 47.946793, 406.61145, 422.3141)
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1858281056]
+visible = false
 position = Vector2(4, -32)
 collision_layer = 8
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=730219372]
-position = Vector2(1, 19)
+position = Vector2(4, 7)
 shape = SubResource("1_hitbox")
+
+[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=2094548727]

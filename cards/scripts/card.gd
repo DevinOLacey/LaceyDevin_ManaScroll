@@ -4,34 +4,10 @@ signal hovered
 signal hovered_off
 
 const CardContentHelper = preload("res://cards/scripts/card_content_helper.gd")
+const CardConstants = preload("res://shared/constants/card_constants.gd")
 
 @export var registers_hover_signals := true
 @export_enum("Regular", "Scale2", "Scale4") var description_size_preset := 0
-
-# CARD STYLE
-const TITLE_FONT_SIZE_REGULAR = 16
-const TITLE_FONT_SIZE_SCALE_4 = 24
-const TITLE_FONT_SIZE_SCALE_2 = 32
-const COST_FONT_SIZE_REGULAR = 16
-const COST_FONT_SIZE_SCALE_4 = 24
-const COST_FONT_SIZE_SCALE_2 = 32
-const TYPE_FONT_SIZE_REGULAR = 8
-const TYPE_FONT_SIZE_SCALE_4 = 16
-const TYPE_FONT_SIZE_SCALE_2 = 24
-const DESCRIPTION_FONT_SIZE_REGULAR = 8
-const DESCRIPTION_FONT_SIZE_SCALE_4 = 16
-const DESCRIPTION_FONT_SIZE_SCALE_2 = 24
-const DRAW_CHANCE_FONT_SIZE_REGULAR = 4
-const DRAW_CHANCE_FONT_SIZE_SCALE_4 = 16
-#const DRAW_CHANCE_FONT_SIZE_SCALE_2 = DRAW_CHANCE_FONT_SIZE_REGULAR
-const MANIFEST_START_OFFSET = Vector2(0, 48)
-const MANIFEST_START_SCALE = Vector2(0.35, 0.35)
-const MANIFEST_MOTE_COUNT = 14
-const MANIFEST_COLORS = [
-	Color(0.52, 0.93, 1.0, 0.95),
-	Color(0.7, 0.55, 1.0, 0.9),
-	Color(0.95, 0.98, 1.0, 0.95),
-]
 
 var hand_position
 var motion_tween: Tween
@@ -40,18 +16,18 @@ var settle_tween: Tween
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	CardContentHelper.apply_text_font_sizes(self, description_size_preset, {
-		"title_regular": TITLE_FONT_SIZE_REGULAR,
-		"title_scale_2": TITLE_FONT_SIZE_SCALE_2,
-		"title_scale_4": TITLE_FONT_SIZE_SCALE_4,
-		"cost_regular": COST_FONT_SIZE_REGULAR,
-		"cost_scale_2": COST_FONT_SIZE_SCALE_2,
-		"cost_scale_4": COST_FONT_SIZE_SCALE_4,
-		"type_regular": TYPE_FONT_SIZE_REGULAR,
-		"type_scale_2": TYPE_FONT_SIZE_SCALE_2,
-		"type_scale_4": TYPE_FONT_SIZE_SCALE_4,
-		"description_regular": DESCRIPTION_FONT_SIZE_REGULAR,
-		"description_scale_2": DESCRIPTION_FONT_SIZE_SCALE_2,
-		"description_scale_4": DESCRIPTION_FONT_SIZE_SCALE_4,
+		"title_regular": CardConstants.TITLE_FONT_SIZE_REGULAR,
+		"title_scale_2": CardConstants.TITLE_FONT_SIZE_SCALE_2,
+		"title_scale_4": CardConstants.TITLE_FONT_SIZE_SCALE_4,
+		"cost_regular": CardConstants.COST_FONT_SIZE_REGULAR,
+		"cost_scale_2": CardConstants.COST_FONT_SIZE_SCALE_2,
+		"cost_scale_4": CardConstants.COST_FONT_SIZE_SCALE_4,
+		"type_regular": CardConstants.TYPE_FONT_SIZE_REGULAR,
+		"type_scale_2": CardConstants.TYPE_FONT_SIZE_SCALE_2,
+		"type_scale_4": CardConstants.TYPE_FONT_SIZE_SCALE_4,
+		"description_regular": CardConstants.DESCRIPTION_FONT_SIZE_REGULAR,
+		"description_scale_2": CardConstants.DESCRIPTION_FONT_SIZE_SCALE_2,
+		"description_scale_4": CardConstants.DESCRIPTION_FONT_SIZE_SCALE_4,
 	})
 	CardContentHelper.apply_label_z_index(self)
 	if registers_hover_signals and get_parent().has_method("connect_card_signals"):
@@ -92,8 +68,8 @@ func manifest_to_position(target_position: Vector2, duration: float) -> void:
 	if collision:
 		collision.disabled = true
 
-	position = target_position + MANIFEST_START_OFFSET
-	scale = MANIFEST_START_SCALE
+	position = target_position + CardConstants.MANIFEST_START_OFFSET
+	scale = CardConstants.MANIFEST_START_SCALE
 	rotation_degrees = randf_range(-8.0, 8.0)
 	modulate = Color(1, 1, 1, 0)
 	z_index = max(z_index, 3)
@@ -141,11 +117,11 @@ func stop_motion_tweens(reset_transform: bool = false) -> void:
 
 
 func _spawn_manifest_motes(duration: float) -> void:
-	for i in range(MANIFEST_MOTE_COUNT):
+	for i in range(CardConstants.MANIFEST_MOTE_COUNT):
 		var mote: ColorRect = ColorRect.new()
 		var mote_size: float = randf_range(5.0, 12.0)
 		mote.size = Vector2(mote_size, mote_size)
-		mote.color = MANIFEST_COLORS[randi() % MANIFEST_COLORS.size()]
+		mote.color = CardConstants.MANIFEST_COLORS[randi() % CardConstants.MANIFEST_COLORS.size()]
 		mote.position = _random_manifest_point() - (mote.size / 2.0)
 		mote.pivot_offset = mote.size / 2.0
 		mote.rotation = randf_range(-PI, PI)

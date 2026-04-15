@@ -10,14 +10,8 @@ const BattlePathEffectsService = preload("res://battle/scripts/battle_path_effec
 const BattleTargeting = preload("res://battle/scripts/battle_targeting.gd")
 const BattleUIPresenter = preload("res://battle/scripts/battle_ui_presenter.gd")
 const EnemyDatabaseResource = preload("res://battle/data/enemy_database.gd")
+const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 const SELECT_FROM_HAND_SCENE = preload("res://cards/scenes/select_from_hand.tscn")
-const DEFEAT_SCENE_PATH := "res://ui/scenes/defeat_menu.tscn"
-
-const STARTING_HEALTH := 20
-const AI_ACTION_DELAY := 0.8
-const PLAYER_DEATH_ANIMATION_LEAD_TIME := 0.0
-const ENEMY_DEFEAT_MODAL_DELAY := 0.35
-const DEFEAT_TRANSITION_FADE_DURATION := 0.35
 
 var battle_timer: Timer
 var end_turn_button: TextureButton
@@ -72,9 +66,9 @@ var opponent_max_mana := 0
 var opponent_current_mana := 0
 var opponent_mana_regen := 1.0
 var opponent_mana_progress := 0.0
-var player_health := STARTING_HEALTH
-var opponent_max_health := STARTING_HEALTH
-var opponent_health := STARTING_HEALTH
+var player_health := BattleConstants.STARTING_HEALTH
+var opponent_max_health := BattleConstants.STARTING_HEALTH
+var opponent_health := BattleConstants.STARTING_HEALTH
 var current_stage_number := 1
 var player_block := 0
 var opponent_block := 0
@@ -97,7 +91,7 @@ var card_definitions := CombatCardDatabase.get_card_definitions()
 func _ready() -> void:
 	battle_timer = $"../BattleTimer"
 	battle_timer.one_shot = true
-	battle_timer.wait_time = AI_ACTION_DELAY
+	battle_timer.wait_time = BattleConstants.AI_ACTION_DELAY
 	end_turn_button = $"../EndTurnButton"
 	deck_ref = $"../PlayerSide/PlayerDecks/Deck"
 	player_hand_ref = $"../PlayerSide/PlayerDecks/PlayerHand"
@@ -164,6 +158,14 @@ func _on_close_combat_log_button_pressed() -> void:
 
 func can_player_interact() -> bool:
 	return active_side == "player" and not resolving_turn and selection_scene_ref == null and not _is_level_up_overlay_visible()
+
+
+func set_player_drag_card(card: Node2D = null) -> void:
+	var dragging_spell := false
+	if card != null and is_instance_valid(card):
+		var card_data: Dictionary = card.get_meta("card_data", {})
+		dragging_spell = str(card_data.get("category", "")).to_lower() == "spell"
+	_set_player_spell_drag_active(dragging_spell)
 
 
 func is_selection_active() -> bool:
@@ -254,6 +256,7 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 	player_current_mana -= total_cost
 	player_remaining_spell_actions = maxi(0, player_remaining_spell_actions - 1)
 	_discard_player_card(card)
+	_play_player_cast_animation(card_id, resolved_card_data)
 	await _show_spell_preview(card_id, resolved_card_data, "player")
 	var resolution := _resolve_spell_effect(resolved_card_data, "player", target, effect_multiplier)
 
@@ -299,7 +302,7 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 		multiplier,
 		{
 			"player_health": player_health,
-			"player_max_health": STARTING_HEALTH,
+			"player_max_health": BattleConstants.STARTING_HEALTH,
 			"player_block": player_block,
 			"player_ember_guard_active": BattlePathEffectsService.is_ember_guard_active(player_path_runtime),
 			"player_frost_armor_charges": BattlePathEffectsService.get_frost_armor_charges(player_path_runtime),
@@ -326,6 +329,25 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 
 	_update_hud()
 	return resolution
+
+
+func _set_player_spell_drag_active(active: bool) -> void:
+	if player_target and player_target.has_method("set_spell_drag_active"):
+		player_target.set_spell_drag_active(active)
+
+
+func _play_player_cast_animation(card_id: String, card_data: Dictionary) -> void:
+	if player_target and player_target.has_method("play_cast_animation"):
+		player_target.play_cast_animation(card_id, card_data)
+
+
+func _play_enemy_action_pose(card_data: Dictionary) -> void:
+	if enemy_target == null:
+		return
+	if int(card_data.get("damage", 0)) > 0 and enemy_target.has_method("play_attack_pose"):
+		enemy_target.play_attack_pose()
+	elif int(card_data.get("block", 0)) > 0 and enemy_target.has_method("play_defend_pose"):
+		enemy_target.play_defend_pose()
 
 
 func _end_player_turn(reason: String) -> void:
@@ -372,6 +394,7 @@ func _run_opponent_turn() -> void:
 		opponent_mana_progress = maxf(0.0, opponent_mana_progress - float(mana_cost))
 		_sync_opponent_mana()
 		opponent_remaining_spell_actions = maxi(0, opponent_remaining_spell_actions - 1)
+		_play_enemy_action_pose(card_data)
 		await _show_spell_preview(opponent_card, card_data, "opponent")
 		var resolution := _resolve_spell_effect(card_data, "opponent", BattleTargeting.get_default_target_for_opponent(card_data, player_target, enemy_target))
 		var extra_messages: Array[String] = []
@@ -509,7 +532,7 @@ func _update_hud() -> void:
 			"player_current_mana": player_current_mana,
 			"opponent_current_mana": opponent_current_mana,
 			"player_health": player_health,
-			"starting_health": STARTING_HEALTH,
+			"starting_health": BattleConstants.STARTING_HEALTH,
 			"player_level": player_level,
 			"player_mana_regen": player_mana_regen,
 			"current_stage_number": current_stage_number,
@@ -626,12 +649,12 @@ func _is_battle_over() -> bool:
 
 func _show_defeat_screen() -> void:
 	await _play_defeat_transition()
-	get_tree().change_scene_to_file(DEFEAT_SCENE_PATH)
+	get_tree().change_scene_to_file(BattleConstants.DEFEAT_SCENE_PATH)
 
 
 func _play_defeat_transition() -> void:
-	if PLAYER_DEATH_ANIMATION_LEAD_TIME > 0.0:
-		await get_tree().create_timer(PLAYER_DEATH_ANIMATION_LEAD_TIME).timeout
+	if BattleConstants.PLAYER_DEATH_ANIMATION_LEAD_TIME > 0.0:
+		await get_tree().create_timer(BattleConstants.PLAYER_DEATH_ANIMATION_LEAD_TIME).timeout
 
 	if defeat_transition_layer == null or defeat_transition_rect == null:
 		return
@@ -639,7 +662,7 @@ func _play_defeat_transition() -> void:
 	defeat_transition_layer.visible = true
 	defeat_transition_rect.color = Color(0, 0, 0, 0)
 	var tween := create_tween()
-	tween.tween_property(defeat_transition_rect, "color", Color(0, 0, 0, 1), DEFEAT_TRANSITION_FADE_DURATION)
+	tween.tween_property(defeat_transition_rect, "color", Color(0, 0, 0, 1), BattleConstants.DEFEAT_TRANSITION_FADE_DURATION)
 	await tween.finished
 
 
@@ -693,8 +716,8 @@ func _show_level_up_overlay_after_victory() -> void:
 		enemy_target.play_defeat_animation()
 		await enemy_target.defeat_animation_finished
 
-	if ENEMY_DEFEAT_MODAL_DELAY > 0.0:
-		await get_tree().create_timer(ENEMY_DEFEAT_MODAL_DELAY).timeout
+	if BattleConstants.ENEMY_DEFEAT_MODAL_DELAY > 0.0:
+		await get_tree().create_timer(BattleConstants.ENEMY_DEFEAT_MODAL_DELAY).timeout
 
 	pending_level_up_options = BattleLevelUpService.build_level_up_options(3)
 	if level_up_overlay and level_up_overlay.has_method("configure_options"):
@@ -736,7 +759,7 @@ func _is_level_up_overlay_visible() -> bool:
 func _spawn_enemy_for_stage(stage_number: int) -> void:
 	current_enemy_data = EnemyDatabaseResource.get_enemy_for_stage(stage_number)
 	current_enemy_id = str(current_enemy_data.get("id", "training_dummy"))
-	opponent_max_health = int(current_enemy_data.get("max_health", STARTING_HEALTH))
+	opponent_max_health = int(current_enemy_data.get("max_health", BattleConstants.STARTING_HEALTH))
 	opponent_health = opponent_max_health
 	opponent_block = 0
 	opponent_mana_progress = float(current_enemy_data.get("starting_mana", 0.0))

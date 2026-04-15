@@ -1,21 +1,52 @@
 [gd_scene format=3 uid="uid://1ey835hx28mh"]
 
-[ext_resource type="Texture2D" path="res://battle/art/actors/player_spritesheet.png" id="1_3vyb7"]
+[ext_resource type="Texture2D" uid="uid://bxnvhngd6idgr" path="res://battle/art/actors/mage sprite sheet.png" id="1_3vyb7"]
+[ext_resource type="Script" uid="uid://dhhnvw5ua5h55" path="res://battle/scripts/player_actor.gd" id="2_k0g2i"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
-size = Vector2(77, 94)
+size = Vector2(60, 116)
 
 [node name="Player" type="Node2D" unique_id=2089395328]
+script = ExtResource("2_k0g2i")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1389727374]
+[node name="default" type="Sprite2D" parent="." unique_id=941055610]
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("1_3vyb7")
+flip_h = true
+region_enabled = true
+region_rect = Rect2(251.35852, 74.45914, 208.1142, 397.0443)
+
+[node name="channel" type="Sprite2D" parent="." unique_id=66492052]
+visible = false
+position = Vector2(15, -1)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("1_3vyb7")
+flip_h = true
+region_enabled = true
+region_rect = Rect2(565.89185, 62.51294, 308.03912, 408.44003)
+
+[node name="manaBolt" type="Sprite2D" parent="." unique_id=2074276441]
+visible = false
+position = Vector2(58.999996, -1.9999999)
+scale = Vector2(0.4, 0.4)
 texture = ExtResource("1_3vyb7")
 region_enabled = true
-region_rect = Rect2(101.18182, 42.338837, 85.12396, 98.34711)
+region_rect = Rect2(916.6205, 141.63977, 462.2202, 335.17017)
+
+[node name="manaShield" type="Sprite2D" parent="." unique_id=627078486]
+visible = false
+position = Vector2(3.9999998, -5.9999995)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("1_3vyb7")
+flip_h = true
+region_enabled = true
+region_rect = Rect2(486.00037, 504.15613, 590.00024, 455.33533)
 
 [node name="Area2D" type="Area2D" parent="." unique_id=2083649969]
+visible = false
 collision_layer = 8
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=932156212]
-position = Vector2(-1.5, 1)
+position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_g2els")

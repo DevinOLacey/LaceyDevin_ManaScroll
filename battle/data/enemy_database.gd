@@ -2,11 +2,12 @@ extends RefCounted
 class_name EnemyDatabase
 
 const ENEMY_DEFINITIONS := {
+	# Stage 1
 	"training_dummy": {
 		"name": "Training Dummy",
 		"art": "res://battle/art/actors/training_dummy.png",
 		"scene_path": "res://scenes/enemies/training_dummy_enemy.tscn",
-		"max_health": 3,
+		"max_health": 18,
 		"starting_mana": 0,
 		"mana_regen": 0,
 		"scale": Vector2(2.0, 2.0),
@@ -17,11 +18,14 @@ const ENEMY_DEFINITIONS := {
 			"wooden_ward": 0.22,
 		},
 	},
+
+	# Stage 2
 	"bramble_husk": {
 		"name": "Bramble Husk",
 		"art": "res://battle/art/actors/bramble_husk.png",
 		"scene_path": "res://scenes/enemies/bramble_husk_enemy.tscn",
 		"max_health": 22,
+		
 		"starting_mana": 0.0,
 		"mana_regen": 0.5,
 		"scale": Vector2(2.1, 2.1),
@@ -33,6 +37,8 @@ const ENEMY_DEFINITIONS := {
 			"sap_mend": 0.10,
 		},
 	},
+
+	# Stage 3
 	"ember_dummy": {
 		"name": "Ember Dummy",
 		"art": "res://battle/art/actors/training_dummy.png",
