@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dcd3x8n0aduri"
+path="res://.godot/imported/arcane lance.wav-9228f4a7129d6cbb811df2c0b9981680.sample"
+
+[deps]
+
+source_file="res://cards/sounds/enemy cards/arcane lance.wav"
+dest_files=["res://.godot/imported/arcane lance.wav-9228f4a7129d6cbb811df2c0b9981680.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

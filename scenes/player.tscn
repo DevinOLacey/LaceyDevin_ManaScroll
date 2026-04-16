@@ -2,6 +2,9 @@
 
 [ext_resource type="Texture2D" uid="uid://bxnvhngd6idgr" path="res://battle/art/actors/mage sprite sheet.png" id="1_3vyb7"]
 [ext_resource type="Script" uid="uid://dhhnvw5ua5h55" path="res://battle/scripts/player_actor.gd" id="2_k0g2i"]
+[ext_resource type="Texture2D" uid="uid://c3k3cp4ejuvlp" path="res://battle/art/actors/death sprite.png" id="3_qhqgy"]
+[ext_resource type="Texture2D" uid="uid://dn1jbpof0rsmv" path="res://battle/art/actors/accelerate amna gates.png" id="4_qlg0r"]
+[ext_resource type="Texture2D" uid="uid://bgw1ib45ka2hb" path="res://battle/art/actors/unstable discharge.png" id="5_tuyoq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
 size = Vector2(60, 116)
@@ -50,3 +53,28 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=932156212]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_g2els")
+
+[node name="death" type="Sprite2D" parent="." unique_id=1735674893]
+visible = false
+position = Vector2(-42, 46)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("3_qhqgy")
+region_enabled = true
+region_rect = Rect2(550.5388, 762.0096, 434.8379, 183.01251)
+
+[node name="manaGate" type="Sprite2D" parent="." unique_id=558636597]
+visible = false
+position = Vector2(-1, -3)
+scale = Vector2(0.16034481, 0.17193717)
+texture = ExtResource("4_qlg0r")
+flip_h = true
+region_enabled = true
+region_rect = Rect2(485.5747, 99.76924, 580.91284, 735.2514)
+
+[node name="unstableDischarge" type="Sprite2D" parent="." unique_id=306517326]
+visible = false
+position = Vector2(0.5000031, -22.249996)
+scale = Vector2(0.28097734, 0.32843137)
+texture = ExtResource("5_tuyoq")
+region_enabled = true
+region_rect = Rect2(91.050415, 206.15005, 573.5403, 510.5624)

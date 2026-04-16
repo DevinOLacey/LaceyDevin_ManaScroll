@@ -351,6 +351,7 @@ static func _refresh_spell_action_pips(container: HBoxContainer, remaining: int,
 	total = maxi(total, 1)
 	if container.get_child_count() != total:
 		for child in container.get_children():
+			container.remove_child(child)
 			child.queue_free()
 		for index in range(total):
 			var pip := Panel.new()

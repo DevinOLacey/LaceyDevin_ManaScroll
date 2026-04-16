@@ -14,6 +14,15 @@ config/name="LaceyDevin_ManaScroll"
 run/main_scene="res://ui/scenes/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
+[audio]
+
+buses/default_bus_layout="uid://cv61hlilishda"
+bus_layout="res://default_bus_layout.tres"
+
+[autoload]
+
+Backgroundmusic="*uid://c2lpsyavb1n2p"
+
 [display]
 
 window/size/viewport_width=1920

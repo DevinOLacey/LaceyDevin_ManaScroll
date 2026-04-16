@@ -97,10 +97,14 @@ func finish_drag():
 func discard_card(card):
 	if card == null:
 		return
+	if battle_manager_ref and battle_manager_ref.has_method("can_player_interact") and not battle_manager_ref.can_player_interact():
+		_restore_card_interaction_state(card)
+		return
+	if player_hand_ref and player_hand_ref.has_method("has_card") and not player_hand_ref.has_card(card):
+		_restore_card_interaction_state(card)
+		return
 	_prepare_card_for_removal(card)
 	clear_card_hover(card)
-	if player_hand_ref and player_hand_ref.has_method("has_card") and not player_hand_ref.has_card(card):
-		return
 	if battle_manager_ref and battle_manager_ref.has_method("discard_player_card_from_hand"):
 		battle_manager_ref.discard_player_card_from_hand(card)
 
@@ -214,6 +218,16 @@ func _prepare_card_for_removal(card: Node2D) -> void:
 	_set_card_collision_disabled(card, true)
 	if card.has_method("set_visuals_visible"):
 		card.set_visuals_visible(true)
+
+
+func _restore_card_interaction_state(card: Node2D) -> void:
+	if card == null or not is_instance_valid(card):
+		return
+	card.set_meta(CardConstants.CARD_REMOVING_META, false)
+	_set_card_collision_disabled(card, false)
+	if card.has_method("set_visuals_visible"):
+		card.set_visuals_visible(true)
+	card.z_index = 1
 
 
 func _cancel_active_drag_to_hand() -> void:

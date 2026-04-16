@@ -127,6 +127,7 @@ static func _build_ice_bolt_data(base_card_data: Dictionary) -> Dictionary:
 	card_data["name"] = "Ice Bolt"
 	card_data["cost"] = 1
 	card_data["damage"] = 6
+	card_data["cast_sfx"] = "res://cards/sounds/ice bolt cast.wav"
 	card_data["effect"] = "ice_bolt"
 	card_data["description"] = "Hurl a razor shard of frost that [i][b]shatters block[/b][/i] and then deals [i][b]6[/b] damage[/i]"
 	card_data["fusion_match_id"] = "ice_bolt"
@@ -138,6 +139,7 @@ static func _build_frost_armor_data(base_card_data: Dictionary) -> Dictionary:
 	card_data["name"] = "Frost Armor"
 	card_data["cost"] = 1
 	card_data.erase("block")
+	card_data["cast_sfx"] = "res://cards/sounds/frost armor cast.wav"
 	card_data["effect"] = "frost_armor"
 	card_data["description"] = "Wrap yourself in frozen wards and gain [i][b]1 Frost Armor[/b][/i]. Each charge reflects the next attack"
 	card_data["fusion_match_id"] = "frost_armor"

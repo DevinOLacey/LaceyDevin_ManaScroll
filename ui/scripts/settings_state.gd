@@ -1,5 +1,7 @@
 extends RefCounted
 
+const AudioConstants = preload("res://shared/constants/audio_constants.gd")
+const AudioBusService = preload("res://shared/services/audio_bus_service.gd")
 const UIConstants = preload("res://shared/constants/ui_constants.gd")
 
 static func load_settings() -> Dictionary:
@@ -9,7 +11,10 @@ static func load_settings() -> Dictionary:
 		return _default_settings()
 
 	var settings := _default_settings()
-	settings["master_volume"] = float(config.get_value(UIConstants.AUDIO_SECTION, "master_volume", settings["master_volume"]))
+	settings[AudioConstants.MASTER_VOLUME_KEY] = float(config.get_value(UIConstants.AUDIO_SECTION, AudioConstants.MASTER_VOLUME_KEY, settings[AudioConstants.MASTER_VOLUME_KEY]))
+	settings[AudioConstants.PLAYER_CARDS_VOLUME_KEY] = float(config.get_value(UIConstants.AUDIO_SECTION, AudioConstants.PLAYER_CARDS_VOLUME_KEY, settings[AudioConstants.PLAYER_CARDS_VOLUME_KEY]))
+	settings[AudioConstants.ENEMY_CARDS_VOLUME_KEY] = float(config.get_value(UIConstants.AUDIO_SECTION, AudioConstants.ENEMY_CARDS_VOLUME_KEY, settings[AudioConstants.ENEMY_CARDS_VOLUME_KEY]))
+	settings[AudioConstants.MUSIC_VOLUME_KEY] = float(config.get_value(UIConstants.AUDIO_SECTION, AudioConstants.MUSIC_VOLUME_KEY, settings[AudioConstants.MUSIC_VOLUME_KEY]))
 	settings["fullscreen"] = bool(config.get_value(UIConstants.VIDEO_SECTION, "fullscreen", settings["fullscreen"]))
 	return settings
 
@@ -20,17 +25,16 @@ static func save_settings(settings: Dictionary) -> void:
 		merged_settings[key] = settings[key]
 
 	var config := ConfigFile.new()
-	config.set_value(UIConstants.AUDIO_SECTION, "master_volume", float(merged_settings["master_volume"]))
+	config.set_value(UIConstants.AUDIO_SECTION, AudioConstants.MASTER_VOLUME_KEY, float(merged_settings[AudioConstants.MASTER_VOLUME_KEY]))
+	config.set_value(UIConstants.AUDIO_SECTION, AudioConstants.PLAYER_CARDS_VOLUME_KEY, float(merged_settings[AudioConstants.PLAYER_CARDS_VOLUME_KEY]))
+	config.set_value(UIConstants.AUDIO_SECTION, AudioConstants.ENEMY_CARDS_VOLUME_KEY, float(merged_settings[AudioConstants.ENEMY_CARDS_VOLUME_KEY]))
+	config.set_value(UIConstants.AUDIO_SECTION, AudioConstants.MUSIC_VOLUME_KEY, float(merged_settings[AudioConstants.MUSIC_VOLUME_KEY]))
 	config.set_value(UIConstants.VIDEO_SECTION, "fullscreen", bool(merged_settings["fullscreen"]))
 	config.save(UIConstants.SETTINGS_PATH)
 
 
 static func apply_settings(settings: Dictionary) -> void:
-	var master_bus_index := AudioServer.get_bus_index(UIConstants.MASTER_BUS_NAME)
-	if master_bus_index != -1:
-		var volume := clampf(float(settings.get("master_volume", 0.8)), 0.0, 1.0)
-		AudioServer.set_bus_volume_db(master_bus_index, linear_to_db(maxf(volume, 0.0001)))
-		AudioServer.set_bus_mute(master_bus_index, volume <= 0.001)
+	AudioBusService.apply_audio_settings(settings)
 
 	DisplayServer.window_set_mode(
 		DisplayServer.WINDOW_MODE_FULLSCREEN
@@ -40,7 +44,6 @@ static func apply_settings(settings: Dictionary) -> void:
 
 
 static func _default_settings() -> Dictionary:
-	return {
-		"master_volume": 0.8,
-		"fullscreen": false,
-	}
+	var defaults := AudioBusService.default_audio_settings()
+	defaults["fullscreen"] = false
+	return defaults

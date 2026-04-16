@@ -1,5 +1,6 @@
 extends Control
 
+const BattleAudioService = preload("res://battle/scripts/battle_audio_service.gd")
 const SETTINGS_STATE = preload("res://ui/scripts/settings_state.gd")
 const UIConstants = preload("res://shared/constants/ui_constants.gd")
 
@@ -21,6 +22,7 @@ func _apply_saved_settings() -> void:
 
 
 func _on_start_button_pressed() -> void:
+	BattleAudioService.stop_background_music()
 	get_tree().change_scene_to_file(UIConstants.BATTLE_SCENE_PATH)
 
 

@@ -6,6 +6,7 @@ const CARD_DEFINITIONS := {
 	"mana_bolt": {
 		"name": "Mana Bolt",
 		"art": "res://cards/art/Mana Bolt.png",
+		"cast_sfx": "res://cards/sounds/mana bolt cast.wav",
 		"cost": 0,
 		"category": "spell",
 		"target_group": "enemy",
@@ -17,6 +18,7 @@ const CARD_DEFINITIONS := {
 	"mana_shield": {
 		"name": "Mana Shield",
 		"art": "res://cards/art/Mana Shield.png",
+		"cast_sfx": "res://cards/sounds/mana shield cast.wav",
 		"cost": 0,
 		"category": "spell",
 		"target_group": "ally",
@@ -40,6 +42,7 @@ const CARD_DEFINITIONS := {
 	"accelerate_mana_gates": {
 		"name": "Accelerate Mana Gates",
 		"art": "res://cards/art/Accelerate Mana Gates.png",
+		"cast_sfx": "res://cards/sounds/saccelerate managates cast.wav",
 		"cost": 3,
 		"category": "spell",
 		"target_group": "self",
@@ -50,6 +53,7 @@ const CARD_DEFINITIONS := {
 	"unstable_discharge": {
 		"name": "Unstable Discharge",
 		"art": "res://cards/art/Unstable Discharge.png",
+		"cast_sfx": "res://cards/sounds/discharge cast.wav",
 		"cost": 2,
 		"category": "spell",
 		"target_group": "self",
@@ -60,6 +64,7 @@ const CARD_DEFINITIONS := {
 	"flame_bolt": {
 		"name": "Flame Bolt",
 		"art": "res://cards/art/Flame Bolt.png",
+		"cast_sfx": "res://cards/sounds/fire bolt cast.wav",
 		"cost": 1,
 		"category": "spell",
 		"target_group": "enemy",
@@ -71,6 +76,7 @@ const CARD_DEFINITIONS := {
 	"ember_shield": {
 		"name": "Ember Shield",
 		"art": "res://cards/art/Ember Shield.png",
+		"cast_sfx": "res://cards/sounds/ember shield cast.wav",
 		"cost": 2,
 		"category": "spell",
 		"target_group": "ally",
@@ -82,6 +88,7 @@ const CARD_DEFINITIONS := {
 	"ice_bolt": {
 		"name": "Ice Bolt",
 		"art": "res://cards/art/Ice Bolt.png",
+		"cast_sfx": "res://cards/sounds/ice bolt cast.wav",
 		"cost": 1,
 		"category": "spell",
 		"target_group": "enemy",
@@ -93,6 +100,7 @@ const CARD_DEFINITIONS := {
 	"frost_armor": {
 		"name": "Frost Armor",
 		"art": "res://cards/art/Frost Armor.png",
+		"cast_sfx": "res://cards/sounds/frost armor cast.wav",
 		"cost": 2,
 		"category": "spell",
 		"target_group": "self",
@@ -105,6 +113,7 @@ const CARD_DEFINITIONS := {
 	"splinter_bolt": {
 		"name": "Splinter Bolt",
 		"art": "res://cards/art/Splinter Bolt.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/splinter bolt cast.wav",
 		"cost": 0,
 		"category": "spell",
 		"target_group": "enemy",
@@ -116,6 +125,7 @@ const CARD_DEFINITIONS := {
 	"wooden_ward": {
 		"name": "Wooden Ward",
 		"art": "res://cards/art/Wooden Ward.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/wooden ward.wav",
 		"cost": 0,
 		"category": "spell",
 		"target_group": "ally",
@@ -129,6 +139,7 @@ const CARD_DEFINITIONS := {
 	"bramble_snap": {
 		"name": "Bramble Snap",
 		"art": "res://cards/art/Bramble Snap.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/bramble snap.wav",
 		"cost": 0,
 		"category": "spell",
 		"target_group": "enemy",
@@ -137,9 +148,22 @@ const CARD_DEFINITIONS := {
 		"effect": null,
 		"description": "Whip thorned brambles across the target for [i][b]2[/b] damage[/i]",
 	},
+	"bramble_whip": {
+		"name": "Bramble Whip",
+		"art": "res://cards/art/Bramble Snap.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/bramble whip.wav",
+		"cost": 1,
+		"category": "spell",
+		"target_group": "enemy",
+		"type": "[b]Spell[/b]",
+		"damage": 7,
+		"effect": null,
+		"description": "Whip thorned brambles across the target for [i][b]2[/b] damage[/i]",
+	},
 	"thick_bark": {
 		"name": "Thick Bark",
 		"art": "res://cards/art/Thick Bark.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/thick bark.wav",
 		"cost": 0,
 		"category": "spell",
 		"target_group": "ally",
@@ -151,6 +175,7 @@ const CARD_DEFINITIONS := {
 	"sap_mend": {
 		"name": "Sap Mend",
 		"art": "res://cards/art/Sap Mend.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/sap mend.wav",
 		"cost": 1,
 		"category": "spell",
 		"target_group": "self",
@@ -164,6 +189,7 @@ const CARD_DEFINITIONS := {
 	"warden_bolt": {
 		"name": "Warden Bolt",
 		"art": "res://cards/art/Mana Bolt.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/warden bolt.wav",
 		"cost": 1,
 		"category": "spell",
 		"target_group": "enemy",
@@ -175,6 +201,7 @@ const CARD_DEFINITIONS := {
 	"arcane_lance": {
 		"name": "Arcane Lance",
 		"art": "res://cards/art/Flame Bolt.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/arcane lance.wav",
 		"cost": 2,
 		"category": "spell",
 		"target_group": "enemy",
@@ -186,6 +213,7 @@ const CARD_DEFINITIONS := {
 	"null_spike": {
 		"name": "Null Spike",
 		"art": "res://cards/art/Ice Bolt.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/null spike.wav",
 		"cost": 1,
 		"category": "spell",
 		"target_group": "self",
@@ -197,6 +225,7 @@ const CARD_DEFINITIONS := {
 	"runic_guard": {
 		"name": "Runic Guard",
 		"art": "res://cards/art/Mana Shield.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/runic guard.wav",
 		"cost": 1,
 		"category": "spell",
 		"target_group": "ally",
@@ -208,6 +237,7 @@ const CARD_DEFINITIONS := {
 	"mirror_aegis": {
 		"name": "Mirror Aegis",
 		"art": "res://cards/art/Frost Armor.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/mirror aegis.wav",
 		"cost": 2,
 		"category": "spell",
 		"target_group": "ally",
@@ -219,6 +249,7 @@ const CARD_DEFINITIONS := {
 	"ley_mend": {
 		"name": "Ley Mend",
 		"art": "res://cards/art/Sap Mend.png",
+		"cast_sfx": "res://cards/sounds/enemy cards/ley mend.wav",
 		"cost": 2,
 		"category": "spell",
 		"target_group": "self",

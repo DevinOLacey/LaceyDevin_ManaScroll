@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cp0fr01srx0aw"
+path="res://.godot/imported/bramble whip.wav-d150543bae5bc15a3841b5950448e6b4.sample"
+
+[deps]
+
+source_file="res://cards/sounds/enemy cards/bramble whip.wav"
+dest_files=["res://.godot/imported/bramble whip.wav-d150543bae5bc15a3841b5950448e6b4.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://ddd3hdgfh1qfc"]
 
 [ext_resource type="PackedScene" uid="uid://c2s7aywrd3dth" path="res://cards/scenes/card_manager.tscn" id="1_0wfyh"]
-[ext_resource type="Script" path="res://battle/scripts/player_actor.gd" id="3_0ld40"]
 [ext_resource type="PackedScene" uid="uid://my3huekfu038" path="res://cards/scenes/player_hand.tscn" id="3_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://dbk7agsrxcp17" path="res://battle/scenes/input_manager.tscn" id="4_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://crlu04u2ebpio" path="res://deck/scenes/deck.tscn" id="5_tbgi4"]
@@ -19,6 +18,7 @@
 [ext_resource type="PackedScene" path="res://battle/scenes/battle_level_up_overlay.tscn" id="17_level_up"]
 [ext_resource type="Texture2D" uid="uid://bqf3lcadtdwki" path="res://ui/art/backgrounds/background.png" id="18_combat_bg"]
 [ext_resource type="PackedScene" path="res://battle/scenes/battle_spell_preview_overlay.tscn" id="19_spell_preview"]
+[ext_resource type="PackedScene" path="res://battle/scenes/battle_music_player.tscn" id="20_battle_music"]
 
 [node name="main" type="Node2D" unique_id=2029937529]
 
@@ -35,7 +35,6 @@ texture = ExtResource("18_combat_bg")
 [node name="Player" parent="PlayerSide/PlayerSprites" unique_id=2089395328 instance=ExtResource("8_85g3d")]
 position = Vector2(298, 491)
 scale = Vector2(2, 2)
-script = ExtResource("3_0ld40")
 
 [node name="PlayerStats" type="Node" parent="PlayerSide" unique_id=965401508]
 
@@ -104,6 +103,14 @@ texture_hover = ExtResource("6_tefeu")
 
 [node name="BattleTimer" type="Timer" parent="." unique_id=1351592360]
 one_shot = true
+
+[node name="PlayerSpellAudioPlayer" type="AudioStreamPlayer" parent="." unique_id=1259357260]
+bus = &"PlayerCards"
+
+[node name="EnemySpellAudioPlayer" type="AudioStreamPlayer" parent="." unique_id=1684327810]
+bus = &"EnemyCards"
+
+[node name="BattleMusicPlayer" parent="." unique_id=1345429985 instance=ExtResource("20_battle_music")]
 
 [node name="Mana" parent="." unique_id=430450503 instance=ExtResource("9_85g3d")]
 position = Vector2(211, 697)

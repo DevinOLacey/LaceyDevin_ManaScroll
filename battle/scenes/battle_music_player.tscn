@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="AudioStream" uid="uid://2rj320y1ktul" path="res://battle/sounds/combat music.wav" id="1_music"]
+
+[node name="BattleMusicPlayer" type="AudioStreamPlayer"]
+stream = ExtResource("1_music")
+bus = &"Music"

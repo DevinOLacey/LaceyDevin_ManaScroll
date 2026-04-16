@@ -2,6 +2,7 @@ extends Node2D
 
 const CombatCardDatabase = preload("res://cards/data/card_database.gd")
 const BattleCombatResolver = preload("res://battle/scripts/battle_combat_resolver.gd")
+const BattleAudioService = preload("res://battle/scripts/battle_audio_service.gd")
 const BattleEnemyAI = preload("res://battle/scripts/battle_enemy_ai.gd")
 const BattleEnemySceneResolverResource = preload("res://battle/scripts/battle_enemy_scene_resolver.gd")
 const BattleFusionService = preload("res://battle/scripts/battle_fusion_service.gd")
@@ -14,6 +15,9 @@ const BattleConstants = preload("res://shared/constants/battle_constants.gd")
 const SELECT_FROM_HAND_SCENE = preload("res://cards/scenes/select_from_hand.tscn")
 
 var battle_timer: Timer
+var player_spell_audio_player: AudioStreamPlayer
+var enemy_spell_audio_player: AudioStreamPlayer
+var battle_music_player: AudioStreamPlayer
 var end_turn_button: TextureButton
 var deck_ref: Node
 var player_hand_ref: Node
@@ -92,6 +96,9 @@ var card_definitions := CombatCardDatabase.get_card_definitions()
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	battle_timer = $"../BattleTimer"
+	player_spell_audio_player = get_node_or_null("../PlayerSpellAudioPlayer")
+	enemy_spell_audio_player = get_node_or_null("../EnemySpellAudioPlayer")
+	battle_music_player = get_node_or_null("../BattleMusicPlayer")
 	battle_timer.one_shot = true
 	battle_timer.wait_time = BattleConstants.AI_ACTION_DELAY
 	end_turn_button = $"../EndTurnButton"
@@ -138,6 +145,11 @@ func _ready() -> void:
 		deck_ref.set_deck_view_card_data_provider(Callable(self, "_get_deck_view_card_data"))
 	_spawn_enemy_for_stage(current_stage_number)
 	_begin_player_turn(true)
+
+
+func _exit_tree() -> void:
+	BattleAudioService.stop_battle_music(battle_music_player)
+	BattleAudioService.resume_background_music()
 
 
 func _on_end_turn_button_pressed() -> void:
@@ -258,6 +270,7 @@ func _play_player_spell(card: Node2D, card_data: Dictionary, mana_cost: int, tar
 	player_current_mana -= total_cost
 	player_remaining_spell_actions = maxi(0, player_remaining_spell_actions - 1)
 	_discard_player_card(card)
+	BattleAudioService.play_player_spell(player_spell_audio_player, resolved_card_data)
 	_play_player_cast_animation(card_id, resolved_card_data)
 	await _show_spell_preview(card_id, resolved_card_data, "player")
 	var resolution := _resolve_spell_effect(resolved_card_data, "player", target, effect_multiplier)
@@ -410,6 +423,7 @@ func _run_opponent_turn() -> void:
 		opponent_mana_progress = maxf(0.0, opponent_mana_progress - float(mana_cost))
 		_sync_opponent_mana()
 		opponent_remaining_spell_actions = maxi(0, opponent_remaining_spell_actions - 1)
+		BattleAudioService.play_enemy_spell(enemy_spell_audio_player, card_data)
 		_play_enemy_action_pose(card_data)
 		await _show_spell_preview(opponent_card, card_data, "opponent")
 		var resolution := _resolve_spell_effect(card_data, "opponent", BattleTargeting.get_default_target_for_opponent(card_data, player_target, enemy_target))
@@ -643,6 +657,7 @@ func _is_battle_over() -> bool:
 	if player_health <= 0:
 		resolving_turn = true
 		active_side = "finished"
+		BattleAudioService.stop_battle_music(battle_music_player)
 		_set_end_turn_enabled(false)
 		_log_message("You were defeated.")
 		_update_hud()
@@ -652,6 +667,7 @@ func _is_battle_over() -> bool:
 	if opponent_health <= 0:
 		resolving_turn = true
 		active_side = "finished"
+		BattleAudioService.stop_battle_music(battle_music_player)
 		_set_end_turn_enabled(false)
 		_log_message("%s defeated." % _get_current_enemy_name())
 		_update_hud()
@@ -669,6 +685,10 @@ func _show_defeat_screen() -> void:
 
 
 func _play_defeat_transition() -> void:
+	if player_target and player_target.has_method("play_defeat_animation") and player_target.has_signal("defeat_animation_finished"):
+		player_target.play_defeat_animation()
+		await player_target.defeat_animation_finished
+
 	if BattleConstants.PLAYER_DEATH_ANIMATION_LEAD_TIME > 0.0:
 		await get_tree().create_timer(BattleConstants.PLAYER_DEATH_ANIMATION_LEAD_TIME).timeout
 
@@ -737,6 +757,7 @@ func _show_level_up_overlay_after_victory() -> void:
 	if BattleConstants.ENEMY_DEFEAT_MODAL_DELAY > 0.0:
 		await get_tree().create_timer(BattleConstants.ENEMY_DEFEAT_MODAL_DELAY).timeout
 
+	BattleAudioService.resume_background_music()
 	pending_level_up_options = BattleLevelUpService.build_level_up_options(3)
 	if level_up_overlay and level_up_overlay.has_method("configure_options"):
 		level_up_overlay.configure_options(pending_level_up_options)
@@ -775,6 +796,7 @@ func _is_level_up_overlay_visible() -> bool:
 
 
 func _spawn_enemy_for_stage(stage_number: int) -> void:
+	BattleAudioService.play_battle_music(battle_music_player)
 	current_enemy_data = EnemyDatabaseResource.get_enemy_for_stage(stage_number)
 	current_enemy_id = str(current_enemy_data.get("id", "training_dummy"))
 	opponent_max_health = int(current_enemy_data.get("max_health", BattleConstants.STARTING_HEALTH))
@@ -809,6 +831,7 @@ func _reset_player_state_for_new_stage() -> void:
 	player_block = 0
 	player_current_mana = 0
 	player_max_mana = 1
+	player_max_spell_actions = 1
 	player_remaining_spell_actions = player_max_spell_actions
 	pending_fuse_charges = 0
 	BattlePathEffectsService.reset_for_new_stage(player_path_runtime)

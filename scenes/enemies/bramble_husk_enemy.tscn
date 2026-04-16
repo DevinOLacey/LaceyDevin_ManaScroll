@@ -8,7 +8,7 @@
 [sub_resource type="RectangleShape2D" id="1_hitbox"]
 size = Vector2(144, 154)
 
-[node name="Enemy" type="Node2D" unique_id=1132013170]
+[node name="Enemy2" type="Node2D" unique_id=1132013170]
 scale = Vector2(0.5, 0.5)
 script = ExtResource("1_enemy_script")
 
@@ -27,7 +27,7 @@ texture = ExtResource("2_47l2v")
 region_enabled = true
 region_rect = Rect2(195, 672, 581, 251)
 
-[node name="attack" type="Sprite2D" parent="." unique_id=1999295751]
+[node name="snap" type="Sprite2D" parent="." unique_id=1999295751]
 visible = false
 position = Vector2(-9.000002, -40.265)
 scale = Vector2(0.33155078, 0.4606142)
@@ -43,7 +43,7 @@ texture = ExtResource("2_47l2v")
 region_enabled = true
 region_rect = Rect2(867, 453, 593, 490)
 
-[node name="defend" type="Sprite2D" parent="." unique_id=1778134884]
+[node name="thickBark" type="Sprite2D" parent="." unique_id=1778134884]
 visible = false
 position = Vector2(5.000006, -35.30999)
 scale = Vector2(0.32019705, 0.42327017)

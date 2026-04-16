@@ -146,8 +146,8 @@ func _get_card_pose_name(card_id: String, card_data: Dictionary) -> StringName:
 	var normalized_card_id := str(card_id).to_lower()
 	var spell_pose_map: Dictionary = enemy_data.get("spell_pose_map", {})
 	var mapped_pose_name := str(spell_pose_map.get(normalized_card_id, ""))
-	if not mapped_pose_name.is_empty() and _has_pose(StringName(mapped_pose_name)):
-		return StringName(mapped_pose_name)
+	if not mapped_pose_name.is_empty():
+		return _resolve_mapped_pose_name(StringName(mapped_pose_name))
 
 	if int(card_data.get("heal", 0)) > 0:
 		return _resolve_fallback_pose_name(HEALING_POSE)
@@ -165,6 +165,13 @@ func _resolve_fallback_pose_name(preferred_pose: StringName) -> StringName:
 	return DEFAULT_POSE
 
 
+func _resolve_mapped_pose_name(preferred_pose: StringName) -> StringName:
+	for candidate in _get_pose_aliases(preferred_pose):
+		if _has_pose(candidate):
+			return candidate
+	return DEFAULT_POSE
+
+
 func _get_pose_aliases(preferred_pose: StringName) -> Array[StringName]:
 	match preferred_pose:
 		ATTACKING_POSE:
@@ -173,6 +180,24 @@ func _get_pose_aliases(preferred_pose: StringName) -> Array[StringName]:
 			return [DEFENDING_POSE, &"defend"]
 		HEALING_POSE:
 			return [HEALING_POSE, &"healing", DEFENDING_POSE, &"defend"]
+		&"snap":
+			return [&"snap", ATTACKING_POSE, &"attack"]
+		&"whip":
+			return [&"whip", ATTACKING_POSE, &"attack"]
+		&"thickBark":
+			return [&"thickBark", DEFENDING_POSE, &"defend"]
+		&"runic":
+			return [&"runic", DEFENDING_POSE, &"defend"]
+		&"mirror":
+			return [&"mirror", DEFENDING_POSE, &"defend"]
+		&"mend":
+			return [&"mend", HEALING_POSE, &"healing", DEFENDING_POSE, &"defend"]
+		&"bolt":
+			return [&"bolt", ATTACKING_POSE, &"attack"]
+		&"lance":
+			return [&"lance", ATTACKING_POSE, &"attack"]
+		&"spike":
+			return [&"spike", ATTACKING_POSE, &"attack"]
 		DEATH_POSE:
 			return [DEATH_POSE]
 		_:

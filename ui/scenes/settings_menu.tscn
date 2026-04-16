@@ -160,18 +160,18 @@ theme_override_colors/font_color = Color(0.862745, 0.94902, 1, 1)
 theme_override_font_sizes/font_size = 28
 text = "Audio"
 
-[node name="VolumeRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox"]
+[node name="MasterVolumeRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="VolumeLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/VolumeRow"]
+[node name="MasterVolumeLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/MasterVolumeRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(180, 0)
 theme_override_colors/font_color = Color(0.921569, 0.960784, 0.988235, 1)
 theme_override_font_sizes/font_size = 22
 text = "Master Volume"
 
-[node name="VolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/VolumeRow"]
+[node name="MasterVolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/MasterVolumeRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
@@ -180,13 +180,100 @@ max_value = 1.0
 step = 0.01
 value = 0.8
 
-[node name="VolumeValueLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/VolumeRow"]
+[node name="MasterVolumeValueLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/MasterVolumeRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.509804, 0.862745, 0.976471, 1)
 theme_override_font_sizes/font_size = 22
 text = "80%"
+horizontal_alignment = 2
+
+[node name="PlayerCardsVolumeRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PlayerCardsVolumeLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/PlayerCardsVolumeRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+theme_override_colors/font_color = Color(0.921569, 0.960784, 0.988235, 1)
+theme_override_font_sizes/font_size = 22
+text = "Player Cards"
+
+[node name="PlayerCardsVolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/PlayerCardsVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 0.85
+
+[node name="PlayerCardsVolumeValueLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/PlayerCardsVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.509804, 0.862745, 0.976471, 1)
+theme_override_font_sizes/font_size = 22
+text = "85%"
+horizontal_alignment = 2
+
+[node name="EnemyCardsVolumeRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="EnemyCardsVolumeLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/EnemyCardsVolumeRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+theme_override_colors/font_color = Color(0.921569, 0.960784, 0.988235, 1)
+theme_override_font_sizes/font_size = 22
+text = "Enemy Cards"
+
+[node name="EnemyCardsVolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/EnemyCardsVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 0.85
+
+[node name="EnemyCardsVolumeValueLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/EnemyCardsVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.509804, 0.862745, 0.976471, 1)
+theme_override_font_sizes/font_size = 22
+text = "85%"
+horizontal_alignment = 2
+
+[node name="MusicVolumeRow" type="HBoxContainer" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="MusicVolumeLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/MusicVolumeRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+theme_override_colors/font_color = Color(0.921569, 0.960784, 0.988235, 1)
+theme_override_font_sizes/font_size = 22
+text = "Music"
+
+[node name="MusicVolumeSlider" type="HSlider" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/MusicVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 0.7
+
+[node name="MusicVolumeValueLabel" type="Label" parent="Center/Panel/Margin/VBox/AudioCard/AudioVBox/MusicVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.509804, 0.862745, 0.976471, 1)
+theme_override_font_sizes/font_size = 22
+text = "70%"
 horizontal_alignment = 2
 
 [node name="BackButton" type="Button" parent="Center/Panel/Margin/VBox"]
