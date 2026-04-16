@@ -9,6 +9,7 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 		"opponent_block": int(combat_state.get("opponent_block", 0)),
 		"player_ember_guard_active": bool(combat_state.get("player_ember_guard_active", false)),
 		"player_frost_armor_charges": int(combat_state.get("player_frost_armor_charges", 0)),
+		"opponent_mana_thorns": int(combat_state.get("opponent_mana_thorns", 0)),
 		"damage_done": 0,
 		"block_done": 0,
 		"heal_done": 0,
@@ -23,6 +24,7 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 	var total_damage := int(card_data.get("damage", 0)) * multiplier
 	var total_block := int(card_data.get("block", 0)) * multiplier
 	var total_heal := int(card_data.get("heal", 0)) * multiplier
+	var total_mana_thorns := int(card_data.get("mana_thorns", 0)) * multiplier
 	var card_effect := str(card_data.get("effect", ""))
 
 	if total_damage > 0:
@@ -64,6 +66,9 @@ static func resolve_spell_effect(card_data: Dictionary, caster: String, target_k
 			result["log_message"] = "%s healed %s for %d with %s." % [enemy_name, target_name, healed_amount, card_name]
 	elif card_effect == "frost_armor":
 		result["log_message"] = "%s wraps %s in Frost Armor." % [card_name, target_name]
+	elif caster == "opponent" and target_key == "opponent" and card_effect == "mana_thorns" and total_mana_thorns > 0:
+		result["opponent_mana_thorns"] = int(result.get("opponent_mana_thorns", 0)) + total_mana_thorns
+		result["log_message"] = "%s arms %s with %d Mana Thorns." % [card_name, target_name, total_mana_thorns]
 
 	return result
 
