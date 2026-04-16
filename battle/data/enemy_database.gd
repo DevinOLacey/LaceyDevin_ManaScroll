@@ -7,7 +7,7 @@ const ENEMY_DEFINITIONS := {
 		"name": "Training Dummy",
 		"art": "res://battle/art/actors/training_dummy.png",
 		"scene_path": "res://scenes/enemies/training_dummy_enemy.tscn",
-		"max_health": 18,
+		"max_health": 3,
 		"starting_mana": 0,
 		"mana_regen": 0,
 		"scale": Vector2(2.0, 2.0),
@@ -24,13 +24,18 @@ const ENEMY_DEFINITIONS := {
 		"name": "Bramble Husk",
 		"art": "res://battle/art/actors/bramble_husk.png",
 		"scene_path": "res://scenes/enemies/bramble_husk_enemy.tscn",
-		"max_health": 22,
+		"max_health": 3,
 		
 		"starting_mana": 0.0,
 		"mana_regen": 0.5,
 		"scale": Vector2(2.1, 2.1),
 		"tint": Color(1.0, 1.0, 1.0, 1.0),
 		"defensive_spell_id": "thick_bark",
+		"spell_pose_map": {
+			"bramble_snap": "whip",
+			"thick_bark": "defend",
+			"sap_mend": "heal",
+		},
 		"deck_weights": {
 			"bramble_snap": 0.45,
 			"thick_bark": 0.45,
@@ -39,18 +44,32 @@ const ENEMY_DEFINITIONS := {
 	},
 
 	# Stage 3
-	"ember_dummy": {
-		"name": "Ember Dummy",
-		"art": "res://battle/art/actors/training_dummy.png",
-		"scene_path": "res://scenes/enemies/ember_dummy_enemy.tscn",
-		"max_health": 16,
-		"starting_mana": 1,
-		"mana_regen": 2,
-		"scale": Vector2(1.9, 1.9),
-		"tint": Color(1.0, 0.72, 0.66, 1.0),
+	"arcane_warden": {
+		"name": "Arcane Warden",
+		"art": "res://battle/art/actors/mage sprite sheet.png",
+		"scene_path": "res://scenes/enemies/arcane_warden_enemy.tscn",
+		"max_health": 34,
+		"starting_mana": 1.0,
+		"mana_regen": 1.5,
+		"max_spell_actions": 2,
+		"scale": Vector2(2.25, 2.25),
+		"tint": Color(0.82, 0.94, 1.0, 1.0),
+		"defensive_spell_id": "runic_guard",
+		"spell_pose_map": {
+			"warden_bolt": "bolt",
+			"arcane_lance": "lance",
+			"null_spike": "spike",
+			"runic_guard": "runic",
+			"mirror_aegis": "mirror",
+			"ley_mend": "mend",
+		},
 		"deck_weights": {
-			"mana_bolt": 0.8,
-			"mana_shield": 0.2,
+			"warden_bolt": 0.30,
+			"arcane_lance": 0.20,
+			"null_spike": 0.16,
+			"runic_guard": 0.20,
+			"mirror_aegis": 0.08,
+			"ley_mend": 0.06,
 		},
 	},
 }
@@ -58,7 +77,7 @@ const ENEMY_DEFINITIONS := {
 const STAGE_ENEMIES := {
 	1: "training_dummy",
 	2: "bramble_husk",
-	3: "ember_dummy",
+	3: "arcane_warden",
 }
 
 

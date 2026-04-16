@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dd0f4mk4d76ce" path="res://battle/scripts/enemy_actor.gd" id="1_enemy_script"]
 [ext_resource type="Texture2D" uid="uid://6l2280yecllb" path="res://battle/art/actors/Bramble Husk sprite sheet.png" id="2_47l2v"]
 [ext_resource type="Texture2D" uid="uid://dsiwtnq1igt87" path="res://battle/art/actors/bramble husk extended sprite sheet.png" id="3_kpefm"]
+[ext_resource type="Texture2D" uid="uid://codx7ym0g0npg" path="res://battle/art/actors/bramble whip sprite.png" id="4_7otyu"]
 
 [sub_resource type="RectangleShape2D" id="1_hitbox"]
 size = Vector2(144, 154)
@@ -50,6 +51,14 @@ texture = ExtResource("3_kpefm")
 region_enabled = true
 region_rect = Rect2(918.4116, 47.946793, 406.61145, 422.3141)
 
+[node name="whip" type="Sprite2D" parent="." unique_id=2094548727]
+visible = false
+position = Vector2(-119.000015, -23.310001)
+scale = Vector2(0.34499997, 0.4057672)
+texture = ExtResource("4_7otyu")
+region_enabled = true
+region_rect = Rect2(207.13, 570.17004, 1200.32, 378.72998)
+
 [node name="Area2D" type="Area2D" parent="." unique_id=1858281056]
 visible = false
 position = Vector2(4, -32)
@@ -59,5 +68,3 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=730219372]
 position = Vector2(4, 7)
 shape = SubResource("1_hitbox")
-
-[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=2094548727]

@@ -26,6 +26,9 @@ func _process(_delta: float) -> void:
 		hovered_card = null
 		card_is_hovered = false
 		hide_hover_preview()
+	if card_drag and battle_manager_ref and battle_manager_ref.has_method("can_player_interact") and not battle_manager_ref.can_player_interact():
+		_cancel_active_drag_to_hand()
+		return
 	if battle_manager_ref and battle_manager_ref.has_method("is_selection_active") and battle_manager_ref.is_selection_active():
 		if hovered_card:
 			set_hovered_card(null)
@@ -211,6 +214,23 @@ func _prepare_card_for_removal(card: Node2D) -> void:
 	_set_card_collision_disabled(card, true)
 	if card.has_method("set_visuals_visible"):
 		card.set_visuals_visible(true)
+
+
+func _cancel_active_drag_to_hand() -> void:
+	var dragged_card = card_drag
+	if dragged_card == null:
+		return
+
+	set_hovered_card(null)
+	if dragged_card.has_method("set_visuals_visible"):
+		dragged_card.set_visuals_visible(true)
+	hide_hover_preview()
+	_set_card_collision_disabled(dragged_card, false)
+	dragged_card.z_index = 1
+	if player_hand_ref and player_hand_ref.has_method("has_card") and player_hand_ref.has_card(dragged_card):
+		player_hand_ref.add_card_to_hand(dragged_card, CardConstants.RETURN_TO_HAND_SPEED)
+	card_drag = null
+	_set_player_drag_state(null)
 
 
 func _set_player_drag_state(card: Node2D = null) -> void:

@@ -79,11 +79,13 @@ var opponent_remaining_spell_actions := 1
 var pending_fuse_charges := 0
 var opponent_burn_stacks := 0
 var opponent_burn_turns_remaining := 0
+var opponent_mana_thorns := 0
 var active_side := "player"
 var resolving_turn := false
 var current_enemy_id := ""
 var current_enemy_data: Dictionary = {}
 var victory_sequence_started := false
+var spell_preview_active := false
 
 var card_definitions := CombatCardDatabase.get_card_definitions()
 
@@ -157,7 +159,7 @@ func _on_close_combat_log_button_pressed() -> void:
 
 
 func can_player_interact() -> bool:
-	return active_side == "player" and not resolving_turn and selection_scene_ref == null and not _is_level_up_overlay_visible()
+	return active_side == "player" and not resolving_turn and not spell_preview_active and selection_scene_ref == null and not _is_level_up_overlay_visible()
 
 
 func set_player_drag_card(card: Node2D = null) -> void:
@@ -309,6 +311,7 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 			"opponent_health": opponent_health,
 			"opponent_max_health": opponent_max_health,
 			"opponent_block": opponent_block,
+			"opponent_mana_thorns": opponent_mana_thorns,
 		},
 		_get_current_enemy_name()
 	)
@@ -316,8 +319,18 @@ func _resolve_spell_effect(card_data: Dictionary, caster: String, target: Node2D
 	opponent_health = int(resolution.get("opponent_health", opponent_health))
 	player_block = int(resolution.get("player_block", player_block))
 	opponent_block = int(resolution.get("opponent_block", opponent_block))
+	opponent_mana_thorns = int(resolution.get("opponent_mana_thorns", opponent_mana_thorns))
 	BattlePathEffectsService.set_ember_guard_active(player_path_runtime, bool(resolution.get("player_ember_guard_active", BattlePathEffectsService.is_ember_guard_active(player_path_runtime))))
 	BattlePathEffectsService.set_frost_armor_charges(player_path_runtime, int(resolution.get("player_frost_armor_charges", BattlePathEffectsService.get_frost_armor_charges(player_path_runtime))))
+
+	var mana_thorns_trigger_damage := int(resolution.get("damage_done", 0)) + int(resolution.get("blocked_damage", 0))
+	var mana_thorns_damage := _apply_mana_thorns_retaliation(caster, target_key, mana_thorns_trigger_damage)
+	if mana_thorns_damage > 0:
+		resolution["mana_thorns_damage"] = mana_thorns_damage
+		resolution["log_message"] = _compose_battle_message(str(resolution.get("log_message", "")), [
+			"%s's Mana Thorns retaliate for %d." % [_get_current_enemy_name(), mana_thorns_damage]
+		])
+
 	_append_combat_log(
 		card_data,
 		caster,
@@ -344,9 +357,12 @@ func _play_player_cast_animation(card_id: String, card_data: Dictionary) -> void
 func _play_enemy_action_pose(card_data: Dictionary) -> void:
 	if enemy_target == null:
 		return
-	if int(card_data.get("damage", 0)) > 0 and enemy_target.has_method("play_attack_pose"):
+	var card_id := str(card_data.get("id", card_data.get("name", ""))).to_lower().replace(" ", "_")
+	if enemy_target.has_method("play_card_pose"):
+		enemy_target.play_card_pose(card_id, card_data)
+	elif int(card_data.get("damage", 0)) > 0 and enemy_target.has_method("play_attack_pose"):
 		enemy_target.play_attack_pose()
-	elif int(card_data.get("block", 0)) > 0 and enemy_target.has_method("play_defend_pose"):
+	elif (int(card_data.get("block", 0)) > 0 or int(card_data.get("heal", 0)) > 0 or str(card_data.get("effect", "")) == "mana_thorns") and enemy_target.has_method("play_defend_pose"):
 		enemy_target.play_defend_pose()
 
 
@@ -695,7 +711,9 @@ func _scroll_combat_log_to_top() -> void:
 func _show_spell_preview(card_id: String, card_data: Dictionary, caster: String) -> void:
 	if spell_preview_overlay == null or not spell_preview_overlay.has_method("show_spell_preview"):
 		return
+	spell_preview_active = true
 	await spell_preview_overlay.show_spell_preview(card_id, card_data, caster)
+	spell_preview_active = false
 
 
 func _wire_ui_signals() -> void:
@@ -764,11 +782,13 @@ func _spawn_enemy_for_stage(stage_number: int) -> void:
 	opponent_block = 0
 	opponent_mana_progress = float(current_enemy_data.get("starting_mana", 0.0))
 	opponent_mana_regen = float(current_enemy_data.get("mana_regen", 1.0))
+	opponent_max_spell_actions = maxi(1, int(current_enemy_data.get("max_spell_actions", 1)))
 	opponent_max_mana = maxi(0, int(floor(opponent_mana_progress)))
 	_sync_opponent_mana()
 	opponent_turn_number = 0
 	opponent_burn_stacks = 0
 	opponent_burn_turns_remaining = 0
+	opponent_mana_thorns = 0
 	resolving_turn = false
 
 	if enemy_sprites_ref == null:
@@ -895,6 +915,27 @@ func _apply_burn_to_target(target_key: String, amount: int) -> String:
 	return ""
 
 
+func _apply_mana_thorns_retaliation(caster: String, target_key: String, damage_done: int) -> int:
+	if caster != "player" or target_key != "opponent" or damage_done <= 0 or opponent_mana_thorns <= 0:
+		return 0
+
+	var thorns_resolution := BattleCombatResolver.apply_status_damage(
+		"player",
+		opponent_mana_thorns,
+		{
+			"player_health": player_health,
+			"opponent_health": opponent_health,
+			"player_block": player_block,
+			"opponent_block": opponent_block,
+			"player_ember_guard_active": BattlePathEffectsService.is_ember_guard_active(player_path_runtime),
+		}
+	)
+	player_health = int(thorns_resolution.get("player_health", player_health))
+	player_block = int(thorns_resolution.get("player_block", player_block))
+	BattlePathEffectsService.set_ember_guard_active(player_path_runtime, bool(thorns_resolution.get("player_ember_guard_active", BattlePathEffectsService.is_ember_guard_active(player_path_runtime))))
+	return opponent_mana_thorns
+
+
 func _apply_turn_start_statuses(side: String) -> bool:
 	if side != "opponent":
 		return false
@@ -940,11 +981,16 @@ func _get_class_mechanics_text() -> String:
 
 
 func _get_opponent_ailments_text() -> String:
-	if opponent_burn_stacks <= 0 or opponent_burn_turns_remaining <= 0:
-		return ""
+	var statuses: Array[String] = []
 
-	return "Burn %d\n%d turn%s remaining" % [
-		opponent_burn_stacks,
-		opponent_burn_turns_remaining,
-		"" if opponent_burn_turns_remaining == 1 else "s",
-	]
+	if opponent_burn_stacks > 0 and opponent_burn_turns_remaining > 0:
+		statuses.append("Burn %d\n%d turn%s remaining" % [
+			opponent_burn_stacks,
+			opponent_burn_turns_remaining,
+			"" if opponent_burn_turns_remaining == 1 else "s",
+		])
+
+	if opponent_mana_thorns > 0:
+		statuses.append("Mana Thorns %d" % opponent_mana_thorns)
+
+	return "\n".join(statuses)
